@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dynamic Reallocation</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#1f2937}
+.topbar{background:#17233a;color:#fff;padding:18px 30px;display:flex;justify-content:space-between;align-items:center}.topbar h1{margin:0;font-size:23px}.topbar p{margin:5px 0 0;font-size:13px}.logout{background:#dc2626;color:#fff;padding:9px 14px;border-radius:8px;text-decoration:none;font-weight:bold}
+.container{width:min(1150px,96%);margin:28px auto}.back{color:#2563eb;text-decoration:none;font-weight:bold;display:inline-block;margin-bottom:18px}
+.card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 5px 18px rgba(0,0,0,.07);margin-bottom:20px}.title{margin:0 0 6px}.sub{color:#64748b;margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.item{background:#f8fafc;padding:14px;border-radius:10px}.label{font-size:11px;color:#64748b;text-transform:uppercase}.value{font-weight:800;margin-top:5px}
+.status{padding:12px 14px;border-radius:10px;font-weight:700}.ok{background:#dcfce7;color:#166534}.bad{background:#fee2e2;color:#991b1b}.info{background:#dbeafe;color:#1d4ed8}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:11px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px}th{background:#eef3f9}.badge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800}.yes{background:#dcfce7;color:#166534}.no{background:#fef3c7;color:#92400e}
+.btn{border:0;border-radius:8px;padding:10px 14px;background:#7c3aed;color:#fff;font-weight:800;cursor:pointer}.empty{padding:22px;background:#f8fafc;border-radius:10px;color:#64748b}.note{font-size:12px;color:#64748b;margin-top:12px}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.grid{grid-template-columns:1fr}}
+</style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<style id="substiflow-admin-theme">
+/* ==========================================================
+   SUBSTIFLOW ADMIN THEME
+   Consistent Midnight Blue + Electric Cyan for admin pages.
+   Scoped to body.admin-page so teacher/home pages are untouched.
+   ========================================================== */
+body.admin-page{
+    min-height:100vh !important;
+    margin:0 !important;
+    background:
+        radial-gradient(circle at 8% 0%, rgba(34,211,238,.14), transparent 27%),
+        radial-gradient(circle at 92% 12%, rgba(99,102,241,.16), transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(6,182,212,.09), transparent 34%),
+        linear-gradient(135deg,#020617 0%,#06152d 48%,#08293b 100%) !important;
+    color:#eaf4ff !important;
+}
+body.admin-page .topbar{
+    background:rgba(2,10,26,.94) !important;
+    color:#f8fbff !important;
+    border-bottom:1px solid rgba(34,211,238,.25) !important;
+    box-shadow:0 8px 30px rgba(0,0,0,.28) !important;
+}
+body.admin-page .brand h1,
+body.admin-page .topbar h1,
+body.admin-page h1,
+body.admin-page h2,
+body.admin-page h3,
+body.admin-page h4,
+body.admin-page strong,
+body.admin-page b,
+body.admin-page .page-title h2,
+body.admin-page .section-header h3,
+body.admin-page .title h2{
+    color:#f7fbff !important;
+}
+body.admin-page p,
+body.admin-page .subtitle,
+body.admin-page .sub,
+body.admin-page .muted,
+body.admin-page .note,
+body.admin-page .section-header p,
+body.admin-page .page-title p,
+body.admin-page label,
+body.admin-page .reason,
+body.admin-page .info-card span{
+    color:#b8cce3 !important;
+}
+body.admin-page .container{position:relative;z-index:1}
+body.admin-page .card,
+body.admin-page .section,
+body.admin-page .table-card,
+body.admin-page .hero-card,
+body.admin-page .profile-card,
+body.admin-page .info-card{
+    background:linear-gradient(145deg,rgba(9,24,48,.94),rgba(7,39,57,.90)) !important;
+    color:#eaf4ff !important;
+    border:1px solid rgba(96,221,241,.20) !important;
+    box-shadow:0 16px 36px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.03) !important;
+}
+body.admin-page .stat-card{
+    color:#eef8ff !important;
+    background:linear-gradient(145deg,rgba(8,24,47,.96),rgba(10,38,56,.92)) !important;
+    border:1px solid rgba(34,211,238,.22) !important;
+    border-left:5px solid #22d3ee !important;
+    box-shadow:0 12px 30px rgba(0,0,0,.25) !important;
+}
+body.admin-page .stat-card.pending{border-left-color:#f59e0b !important}
+body.admin-page .stat-card.assigned{border-left-color:#22c55e !important}
+body.admin-page .stat-card.rejected{border-left-color:#ef4444 !important}
+body.admin-page .stat-card.admin{border-left-color:#a78bfa !important}
+body.admin-page .stat-label{color:#9fb8d1 !important}
+body.admin-page .stat-value{color:#f8fbff !important;text-shadow:0 0 14px rgba(34,211,238,.16)}
+body.admin-page table{
+    background:transparent !important;
+    color:#eef7ff !important;
+}
+body.admin-page th{
+    background:linear-gradient(180deg,#0c2442,#0a1b34) !important;
+    color:#dff8ff !important;
+    border-bottom:1px solid rgba(34,211,238,.30) !important;
+}
+body.admin-page td{
+    background:#0a1930 !important;
+    color:#e9f4ff !important;
+    border-bottom:1px solid rgba(128,164,194,.16) !important;
+}
+body.admin-page tbody tr:hover td,
+body.admin-page table tr:hover td{
+    background:#102847 !important;
+    color:#ffffff !important;
+}
+body.admin-page tbody tr:active td,
+body.admin-page table tr:active td,
+body.admin-page tbody tr:focus-within td{
+    background:#102847 !important;
+    color:#ffffff !important;
+}
+body.admin-page input,
+body.admin-page select,
+body.admin-page textarea,
+body.admin-page .faculty-search{
+    background:#07172d !important;
+    color:#eef7ff !important;
+    border:1px solid rgba(96,221,241,.28) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.02) !important;
+}
+body.admin-page input::placeholder,
+body.admin-page textarea::placeholder{color:#7890aa !important}
+body.admin-page input:focus,
+body.admin-page select:focus,
+body.admin-page textarea:focus{
+    border-color:#22d3ee !important;
+    box-shadow:0 0 0 3px rgba(34,211,238,.12) !important;
+    outline:none !important;
+}
+body.admin-page option{background:#081a32 !important;color:#eef7ff !important}
+body.admin-page .back,
+body.admin-page a.back{
+    color:#67e8f9 !important;
+}
+body.admin-page .action-link,
+body.admin-page .btn,
+body.admin-page .submit{
+    border:1px solid rgba(255,255,255,.08) !important;
+    box-shadow:0 8px 18px rgba(0,0,0,.20) !important;
+}
+body.admin-page .action-link:hover,
+body.admin-page .btn:hover,
+body.admin-page .submit:hover{filter:brightness(1.08);transform:translateY(-1px)}
+body.admin-page .empty,
+body.admin-page .faculty-empty{
+    background:rgba(9,25,48,.84) !important;
+    color:#abc1d8 !important;
+    border:1px dashed rgba(96,221,241,.22) !important;
+}
+body.admin-page .badge.pending{background:#3a2b08 !important;color:#ffd76a !important;border:1px solid rgba(245,158,11,.42)}
+body.admin-page .badge.assigned,
+body.admin-page .badge.success,
+body.admin-page .good{background:#0b3525 !important;color:#79f2ad !important;border:1px solid rgba(34,197,94,.38)}
+body.admin-page .badge.rejected,
+body.admin-page .badge.danger,
+body.admin-page .bad{background:#3a1017 !important;color:#ff9aa8 !important;border:1px solid rgba(239,68,68,.38)}
+body.admin-page .badge.admin,
+body.admin-page .violet{background:#25164a !important;color:#c9b7ff !important;border:1px solid rgba(167,139,250,.40)}
+body.admin-page .approved{background:#0c2e42 !important;color:#7ee9ff !important;border:1px solid rgba(34,211,238,.36)}
+body.admin-page .score{color:#67e8f9 !important;font-weight:800 !important}
+body.admin-page .info-card strong{color:#f6fbff !important}
+body.admin-page .faculty-card{
+    background:linear-gradient(145deg,rgba(8,22,43,.96),rgba(8,35,52,.94)) !important;
+    border:1px solid rgba(96,221,241,.20) !important;
+}
+body.admin-page .faculty-card summary{
+    background:linear-gradient(90deg,#0a203b,#0a3040) !important;
+    color:#f2fbff !important;
+}
+body.admin-page .faculty-name{color:#f4fbff !important}
+body.admin-page .faculty-meta{color:#9eb8cf !important}
+body.admin-page .faculty-grid th{background:#0b213d !important;color:#dff8ff !important}
+body.admin-page .faculty-grid td{background:#091a31 !important;color:#eaf5ff !important;border-color:rgba(128,164,194,.16) !important}
+body.admin-page .faculty-grid td:first-child{background:#0d2744 !important;color:#e5f7ff !important}
+body.admin-page .faculty-subject{color:#f4fbff !important}
+body.admin-page .faculty-class,
+body.admin-page .faculty-campus{color:#a9bed4 !important}
+body.admin-page .faculty-type{background:#0b3047 !important;color:#79e9ff !important}
+body.admin-page .faculty-free{color:#7890aa !important}
+body.admin-page .faculty-lab{background:#2c2410 !important;border-color:#8c6a19 !important}
+body.admin-page .info-chip{background:#0b2b42 !important;color:#79e9ff !important;border:1px solid rgba(34,211,238,.22)}
+body.admin-page .logout{box-shadow:0 6px 18px rgba(0,0,0,.25)}
+@media(max-width:700px){
+  body.admin-page .topbar{padding:15px 18px}
+  body.admin-page .container{width:94%}
+}
+</style>
+
+</head>
+<body class="admin-page">
+<header class="topbar"><div><h1>Smart Faculty Substitute System</h1><p>Main Campus · BCA · Dynamic Reallocation</p></div><a class="logout" href="{{ url_for('logout') }}">Logout</a></header>
+<main class="container">
+<a class="back" href="{{ url_for('admin_dashboard') }}">← Back to Admin Dashboard</a>
+<section class="card">
+<h2 class="title">🔄 Dynamic Reallocation</h2>
+<p class="sub">Re-check an assigned substitute and safely create a replacement recommendation when the assigned teacher becomes unavailable.</p>
+<div class="grid">
+<div class="item"><div class="label">Date</div><div class="value">{{ assignment.assignment_date }}</div></div>
+<div class="item"><div class="label">Period</div><div class="value">P{{ assignment.period_no }}</div></div>
+<div class="item"><div class="label">Class</div><div class="value">{{ assignment.class_name }}</div></div>
+<div class="item"><div class="label">Subject</div><div class="value">{{ assignment.subject_name }}</div></div>
+</div>
+</section>
+<section class="card">
+<h3>Current Assigned Teacher</h3>
+<p><strong>{{ assignment.substitute_teacher }}</strong></p>
+{% if current_available %}
+<div class="status ok">✅ Current assigned teacher is still available. Reallocation is not required.</div>
+{% else %}
+<div class="status bad">⚠️ Current assigned teacher is unavailable: {{ current_reason }}</div>
+{% endif %}
+</section>
+{% if not current_available %}
+<section class="card">
+<h3>Replacement Recommendation</h3>
+<p class="sub">Select a new teacher. The old assignment will be marked CANCELLED and the replacement will be created as PENDING for HOD approval.</p>
+{% if candidates %}
+<form method="POST">
+<div class="table-wrap"><table><thead><tr><th>Teacher</th><th>Department</th><th>Subject Eligible</th><th>Daily Classes</th><th>Substitutions Today</th><th>Total Substitutions</th><th>Score</th><th>Action</th></tr></thead><tbody>
+{% for c in candidates %}<tr><td><strong>{{ c.teacher_name }}</strong></td><td>{{ c.department or '—' }}</td><td>{% if c.subject_eligible %}<span class="badge yes">YES</span>{% else %}<span class="badge no">NO</span>{% endif %}</td><td>{{ c.daily_classes }}</td><td>{{ c.substitutions_today }}</td><td>{{ c.total_substitutions }}</td><td><strong>{{ "%.2f"|format((100 if c.subject_eligible else 0) + (100-c.daily_classes*10 if 100-c.daily_classes*10>0 else 0) + (50-c.substitutions_today*10 if 50-c.substitutions_today*10>0 else 0) + (10-c.total_substitutions if 10-c.total_substitutions>0 else 0)) }}</strong></td><td><button class="btn" type="submit" name="teacher_id" value="{{ c.teacher_id }}">Reallocate</button></td></tr>{% endfor %}
+</tbody></table></div>
+</form>
+<div class="note">The selected replacement is re-checked again before the database is changed.</div>
+{% else %}<div class="empty">No replacement teacher is currently available. Admin action is required.</div>{% endif %}
+</section>
+{% endif %}
+</main>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body></html>

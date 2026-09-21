@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unavailability Requests | Smart Faculty Substitute System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<style id="substiflow-admin-theme">
+/* ==========================================================
+   SUBSTIFLOW ADMIN THEME
+   Consistent Midnight Blue + Electric Cyan for admin pages.
+   Scoped to body.admin-page so teacher/home pages are untouched.
+   ========================================================== */
+body.admin-page{
+    min-height:100vh !important;
+    margin:0 !important;
+    background:
+        radial-gradient(circle at 8% 0%, rgba(34,211,238,.14), transparent 27%),
+        radial-gradient(circle at 92% 12%, rgba(99,102,241,.16), transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(6,182,212,.09), transparent 34%),
+        linear-gradient(135deg,#020617 0%,#06152d 48%,#08293b 100%) !important;
+    color:#eaf4ff !important;
+}
+body.admin-page .topbar{
+    background:rgba(2,10,26,.94) !important;
+    color:#f8fbff !important;
+    border-bottom:1px solid rgba(34,211,238,.25) !important;
+    box-shadow:0 8px 30px rgba(0,0,0,.28) !important;
+}
+body.admin-page .brand h1,
+body.admin-page .topbar h1,
+body.admin-page h1,
+body.admin-page h2,
+body.admin-page h3,
+body.admin-page h4,
+body.admin-page strong,
+body.admin-page b,
+body.admin-page .page-title h2,
+body.admin-page .section-header h3,
+body.admin-page .title h2{
+    color:#f7fbff !important;
+}
+body.admin-page p,
+body.admin-page .subtitle,
+body.admin-page .sub,
+body.admin-page .muted,
+body.admin-page .note,
+body.admin-page .section-header p,
+body.admin-page .page-title p,
+body.admin-page label,
+body.admin-page .reason,
+body.admin-page .info-card span{
+    color:#b8cce3 !important;
+}
+body.admin-page .container{position:relative;z-index:1}
+body.admin-page .card,
+body.admin-page .section,
+body.admin-page .table-card,
+body.admin-page .hero-card,
+body.admin-page .profile-card,
+body.admin-page .info-card{
+    background:linear-gradient(145deg,rgba(9,24,48,.94),rgba(7,39,57,.90)) !important;
+    color:#eaf4ff !important;
+    border:1px solid rgba(96,221,241,.20) !important;
+    box-shadow:0 16px 36px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.03) !important;
+}
+body.admin-page .stat-card{
+    color:#eef8ff !important;
+    background:linear-gradient(145deg,rgba(8,24,47,.96),rgba(10,38,56,.92)) !important;
+    border:1px solid rgba(34,211,238,.22) !important;
+    border-left:5px solid #22d3ee !important;
+    box-shadow:0 12px 30px rgba(0,0,0,.25) !important;
+}
+body.admin-page .stat-card.pending{border-left-color:#f59e0b !important}
+body.admin-page .stat-card.assigned{border-left-color:#22c55e !important}
+body.admin-page .stat-card.rejected{border-left-color:#ef4444 !important}
+body.admin-page .stat-card.admin{border-left-color:#a78bfa !important}
+body.admin-page .stat-label{color:#9fb8d1 !important}
+body.admin-page .stat-value{color:#f8fbff !important;text-shadow:0 0 14px rgba(34,211,238,.16)}
+body.admin-page table{
+    background:transparent !important;
+    color:#eef7ff !important;
+}
+body.admin-page th{
+    background:linear-gradient(180deg,#0c2442,#0a1b34) !important;
+    color:#dff8ff !important;
+    border-bottom:1px solid rgba(34,211,238,.30) !important;
+}
+body.admin-page td{
+    background:#0a1930 !important;
+    color:#e9f4ff !important;
+    border-bottom:1px solid rgba(128,164,194,.16) !important;
+}
+body.admin-page tbody tr:hover td,
+body.admin-page table tr:hover td{
+    background:#102847 !important;
+    color:#ffffff !important;
+}
+body.admin-page tbody tr:active td,
+body.admin-page table tr:active td,
+body.admin-page tbody tr:focus-within td{
+    background:#102847 !important;
+    color:#ffffff !important;
+}
+body.admin-page input,
+body.admin-page select,
+body.admin-page textarea,
+body.admin-page .faculty-search{
+    background:#07172d !important;
+    color:#eef7ff !important;
+    border:1px solid rgba(96,221,241,.28) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.02) !important;
+}
+body.admin-page input::placeholder,
+body.admin-page textarea::placeholder{color:#7890aa !important}
+body.admin-page input:focus,
+body.admin-page select:focus,
+body.admin-page textarea:focus{
+    border-color:#22d3ee !important;
+    box-shadow:0 0 0 3px rgba(34,211,238,.12) !important;
+    outline:none !important;
+}
+body.admin-page option{background:#081a32 !important;color:#eef7ff !important}
+body.admin-page .back,
+body.admin-page a.back{
+    color:#67e8f9 !important;
+}
+body.admin-page .action-link,
+body.admin-page .btn,
+body.admin-page .submit{
+    border:1px solid rgba(255,255,255,.08) !important;
+    box-shadow:0 8px 18px rgba(0,0,0,.20) !important;
+}
+body.admin-page .action-link:hover,
+body.admin-page .btn:hover,
+body.admin-page .submit:hover{filter:brightness(1.08);transform:translateY(-1px)}
+body.admin-page .empty,
+body.admin-page .faculty-empty{
+    background:rgba(9,25,48,.84) !important;
+    color:#abc1d8 !important;
+    border:1px dashed rgba(96,221,241,.22) !important;
+}
+body.admin-page .badge.pending{background:#3a2b08 !important;color:#ffd76a !important;border:1px solid rgba(245,158,11,.42)}
+body.admin-page .badge.assigned,
+body.admin-page .badge.success,
+body.admin-page .good{background:#0b3525 !important;color:#79f2ad !important;border:1px solid rgba(34,197,94,.38)}
+body.admin-page .badge.rejected,
+body.admin-page .badge.danger,
+body.admin-page .bad{background:#3a1017 !important;color:#ff9aa8 !important;border:1px solid rgba(239,68,68,.38)}
+body.admin-page .badge.admin,
+body.admin-page .violet{background:#25164a !important;color:#c9b7ff !important;border:1px solid rgba(167,139,250,.40)}
+body.admin-page .approved{background:#0c2e42 !important;color:#7ee9ff !important;border:1px solid rgba(34,211,238,.36)}
+body.admin-page .score{color:#67e8f9 !important;font-weight:800 !important}
+body.admin-page .info-card strong{color:#f6fbff !important}
+body.admin-page .faculty-card{
+    background:linear-gradient(145deg,rgba(8,22,43,.96),rgba(8,35,52,.94)) !important;
+    border:1px solid rgba(96,221,241,.20) !important;
+}
+body.admin-page .faculty-card summary{
+    background:linear-gradient(90deg,#0a203b,#0a3040) !important;
+    color:#f2fbff !important;
+}
+body.admin-page .faculty-name{color:#f4fbff !important}
+body.admin-page .faculty-meta{color:#9eb8cf !important}
+body.admin-page .faculty-grid th{background:#0b213d !important;color:#dff8ff !important}
+body.admin-page .faculty-grid td{background:#091a31 !important;color:#eaf5ff !important;border-color:rgba(128,164,194,.16) !important}
+body.admin-page .faculty-grid td:first-child{background:#0d2744 !important;color:#e5f7ff !important}
+body.admin-page .faculty-subject{color:#f4fbff !important}
+body.admin-page .faculty-class,
+body.admin-page .faculty-campus{color:#a9bed4 !important}
+body.admin-page .faculty-type{background:#0b3047 !important;color:#79e9ff !important}
+body.admin-page .faculty-free{color:#7890aa !important}
+body.admin-page .faculty-lab{background:#2c2410 !important;border-color:#8c6a19 !important}
+body.admin-page .info-chip{background:#0b2b42 !important;color:#79e9ff !important;border:1px solid rgba(34,211,238,.22)}
+body.admin-page .logout{box-shadow:0 6px 18px rgba(0,0,0,.25)}
+@media(max-width:700px){
+  body.admin-page .topbar{padding:15px 18px}
+  body.admin-page .container{width:94%}
+}
+</style>
+
+</head>
+<body class="admin-page">
+<header class="topbar">
+  <div class="brand">
+    <h1>Smart Faculty Substitute System</h1>
+    <p>Main Campus · BCA · HOD / Admin Portal</p>
+  </div>
+  <a class="logout" href="{{ url_for('logout') }}">Logout</a>
+</header>
+
+<main class="container">
+  <a class="back" href="{{ url_for('admin_dashboard') }}">← Back to Admin Dashboard</a>
+
+  <section class="hero-card card">
+    <h2>🕒 Unavailability Requests</h2>
+    <p class="subtitle">Review pending faculty requests before they affect substitute allocation.</p>
+  </section>
+
+  <section class="card">
+    {% if requests %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+        <tr><th>Teacher</th><th>Department</th><th>Date</th><th>Period</th><th>Reason</th><th>Status</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+        {% for row in requests %}
+        <tr>
+          <td><strong>{{ row.teacher_name }}</strong></td>
+          <td>{{ row.department }}</td>
+          <td>{{ row.unavailable_date }}</td>
+          <td><strong>P{{ row.period_no }}</strong></td>
+          <td class="reason">{{ row.reason }}</td>
+          <td><span class="badge pending">{{ row.status }}</span></td>
+          <td>
+            <div class="button-row">
+              <form method="POST" action="{{ url_for('approve_unavailability', request_id=row.unavailability_id) }}">
+                <button type="submit" class="btn btn-approve">Approve</button>
+              </form>
+              <form method="POST" action="{{ url_for('reject_unavailability', request_id=row.unavailability_id) }}">
+                <button type="submit" class="btn btn-reject">Reject</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty">✅ No pending unavailability requests.</div>
+    {% endif %}
+  </section>
+</main>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

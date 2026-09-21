@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Timetable Validation | Smart Faculty Substitute System</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#1f2937}
+.topbar{background:#17233a;color:#fff;padding:18px 30px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.brand h1{margin:0;font-size:24px}.brand p{margin:5px 0 0;font-size:13px;opacity:.9}
+.logout{background:#dc2626;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:600}
+.container{width:min(1250px,96%);margin:30px auto}.back{display:inline-block;margin-bottom:18px;color:#2563eb;text-decoration:none;font-weight:700}
+h2{margin:0 0 7px}.subtitle{margin:0 0 20px;color:#64748b}
+.status{border-radius:14px;padding:22px;margin-bottom:22px;background:#fff;box-shadow:0 5px 18px rgba(0,0,0,.07);border-left:6px solid #16a34a}
+.status.fail{border-left-color:#dc2626}.status h3{margin:0 0 6px}.status p{margin:0;color:#64748b}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
+.card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 5px 18px rgba(0,0,0,.07)}
+.label{font-size:12px;color:#64748b}.value{font-size:28px;font-weight:800;margin-top:5px}.green{color:#166534}.red{color:#991b1b}.orange{color:#92400e}
+.section{background:#fff;border-radius:14px;padding:22px;margin-bottom:22px;box-shadow:0 5px 18px rgba(0,0,0,.07)}
+.section h3{margin-top:0}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:11px 10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px}th{background:#eef3f9}
+.badge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800}.error{background:#fee2e2;color:#991b1b}.warning{background:#fef3c7;color:#92400e}.ok{background:#dcfce7;color:#166534}
+.good-box{background:#f0fdf4;padding:18px;border-radius:10px;color:#166534}.muted{color:#64748b}
+@media(max-width:800px){.stats{grid-template-columns:1fr}.topbar{flex-direction:column;align-items:flex-start}}
+</style>
+
+<style id="substiflow-admin-theme">
+/* ==========================================================
+   SUBSTIFLOW ADMIN THEME
+   Consistent Midnight Blue + Electric Cyan for admin pages.
+   Scoped to body.admin-page so teacher/home pages are untouched.
+   ========================================================== */
+body.admin-page{
+    min-height:100vh !important;
+    margin:0 !important;
+    background:
+        radial-gradient(circle at 8% 0%, rgba(34,211,238,.14), transparent 27%),
+        radial-gradient(circle at 92% 12%, rgba(99,102,241,.16), transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(6,182,212,.09), transparent 34%),
+        linear-gradient(135deg,#020617 0%,#06152d 48%,#08293b 100%) !important;
+    color:#eaf4ff !important;
+}
+body.admin-page .topbar{
+    background:rgba(2,10,26,.94) !important;
+    color:#f8fbff !important;
+    border-bottom:1px solid rgba(34,211,238,.25) !important;
+    box-shadow:0 8px 30px rgba(0,0,0,.28) !important;
+}
+body.admin-page .brand h1,
+body.admin-page .topbar h1,
+body.admin-page h1,
+body.admin-page h2,
+body.admin-page h3,
+body.admin-page h4,
+body.admin-page strong,
+body.admin-page b,
+body.admin-page .page-title h2,
+body.admin-page .section-header h3,
+body.admin-page .title h2{
+    color:#f7fbff !important;
+}
+body.admin-page p,
+body.admin-page .subtitle,
+body.admin-page .sub,
+body.admin-page .muted,
+body.admin-page .note,
+body.admin-page .section-header p,
+body.admin-page .page-title p,
+body.admin-page label,
+body.admin-page .reason,
+body.admin-page .info-card span{
+    color:#b8cce3 !important;
+}
+body.admin-page .container{position:relative;z-index:1}
+body.admin-page .card,
+body.admin-page .section,
+body.admin-page .table-card,
+body.admin-page .hero-card,
+body.admin-page .profile-card,
+body.admin-page .info-card{
+    background:linear-gradient(145deg,rgba(9,24,48,.94),rgba(7,39,57,.90)) !important;
+    color:#eaf4ff !important;
+    border:1px solid rgba(96,221,241,.20) !important;
+    box-shadow:0 16px 36px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.03) !important;
+}
+body.admin-page .stat-card{
+    color:#eef8ff !important;
+    background:linear-gradient(145deg,rgba(8,24,47,.96),rgba(10,38,56,.92)) !important;
+    border:1px solid rgba(34,211,238,.22) !important;
+    border-left:5px solid #22d3ee !important;
+    box-shadow:0 12px 30px rgba(0,0,0,.25) !important;
+}
+body.admin-page .stat-card.pending{border-left-color:#f59e0b !important}
+body.admin-page .stat-card.assigned{border-left-color:#22c55e !important}
+body.admin-page .stat-card.rejected{border-left-color:#ef4444 !important}
+body.admin-page .stat-card.admin{border-left-color:#a78bfa !important}
+body.admin-page .stat-label{color:#9fb8d1 !important}
+body.admin-page .stat-value{color:#f8fbff !important;text-shadow:0 0 14px rgba(34,211,238,.16)}
+body.admin-page table{
+    background:transparent !important;
+    color:#eef7ff !important;
+}
+body.admin-page th{
+    background:linear-gradient(180deg,#0c2442,#0a1b34) !important;
+    color:#dff8ff !important;
+    border-bottom:1px solid rgba(34,211,238,.30) !important;
+}
+body.admin-page td{
+    background:#0a1930 !important;
+    color:#e9f4ff !important;
+    border-bottom:1px solid rgba(128,164,194,.16) !important;
+}
+body.admin-page tbody tr:hover td,
+body.admin-page table tr:hover td{
+    background:#102847 !important;
+    color:#ffffff !important;
+}
+body.admin-page tbody tr:active td,
+body.admin-page table tr:active td,
+body.admin-page tbody tr:focus-within td{
+    background:#102847 !important;
+    color:#ffffff !important;
+}
+body.admin-page input,
+body.admin-page select,
+body.admin-page textarea,
+body.admin-page .faculty-search{
+    background:#07172d !important;
+    color:#eef7ff !important;
+    border:1px solid rgba(96,221,241,.28) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.02) !important;
+}
+body.admin-page input::placeholder,
+body.admin-page textarea::placeholder{color:#7890aa !important}
+body.admin-page input:focus,
+body.admin-page select:focus,
+body.admin-page textarea:focus{
+    border-color:#22d3ee !important;
+    box-shadow:0 0 0 3px rgba(34,211,238,.12) !important;
+    outline:none !important;
+}
+body.admin-page option{background:#081a32 !important;color:#eef7ff !important}
+body.admin-page .back,
+body.admin-page a.back{
+    color:#67e8f9 !important;
+}
+body.admin-page .action-link,
+body.admin-page .btn,
+body.admin-page .submit{
+    border:1px solid rgba(255,255,255,.08) !important;
+    box-shadow:0 8px 18px rgba(0,0,0,.20) !important;
+}
+body.admin-page .action-link:hover,
+body.admin-page .btn:hover,
+body.admin-page .submit:hover{filter:brightness(1.08);transform:translateY(-1px)}
+body.admin-page .empty,
+body.admin-page .faculty-empty{
+    background:rgba(9,25,48,.84) !important;
+    color:#abc1d8 !important;
+    border:1px dashed rgba(96,221,241,.22) !important;
+}
+body.admin-page .badge.pending{background:#3a2b08 !important;color:#ffd76a !important;border:1px solid rgba(245,158,11,.42)}
+body.admin-page .badge.assigned,
+body.admin-page .badge.success,
+body.admin-page .good{background:#0b3525 !important;color:#79f2ad !important;border:1px solid rgba(34,197,94,.38)}
+body.admin-page .badge.rejected,
+body.admin-page .badge.danger,
+body.admin-page .bad{background:#3a1017 !important;color:#ff9aa8 !important;border:1px solid rgba(239,68,68,.38)}
+body.admin-page .badge.admin,
+body.admin-page .violet{background:#25164a !important;color:#c9b7ff !important;border:1px solid rgba(167,139,250,.40)}
+body.admin-page .approved{background:#0c2e42 !important;color:#7ee9ff !important;border:1px solid rgba(34,211,238,.36)}
+body.admin-page .score{color:#67e8f9 !important;font-weight:800 !important}
+body.admin-page .info-card strong{color:#f6fbff !important}
+body.admin-page .faculty-card{
+    background:linear-gradient(145deg,rgba(8,22,43,.96),rgba(8,35,52,.94)) !important;
+    border:1px solid rgba(96,221,241,.20) !important;
+}
+body.admin-page .faculty-card summary{
+    background:linear-gradient(90deg,#0a203b,#0a3040) !important;
+    color:#f2fbff !important;
+}
+body.admin-page .faculty-name{color:#f4fbff !important}
+body.admin-page .faculty-meta{color:#9eb8cf !important}
+body.admin-page .faculty-grid th{background:#0b213d !important;color:#dff8ff !important}
+body.admin-page .faculty-grid td{background:#091a31 !important;color:#eaf5ff !important;border-color:rgba(128,164,194,.16) !important}
+body.admin-page .faculty-grid td:first-child{background:#0d2744 !important;color:#e5f7ff !important}
+body.admin-page .faculty-subject{color:#f4fbff !important}
+body.admin-page .faculty-class,
+body.admin-page .faculty-campus{color:#a9bed4 !important}
+body.admin-page .faculty-type{background:#0b3047 !important;color:#79e9ff !important}
+body.admin-page .faculty-free{color:#7890aa !important}
+body.admin-page .faculty-lab{background:#2c2410 !important;border-color:#8c6a19 !important}
+body.admin-page .info-chip{background:#0b2b42 !important;color:#79e9ff !important;border:1px solid rgba(34,211,238,.22)}
+body.admin-page .logout{box-shadow:0 6px 18px rgba(0,0,0,.25)}
+@media(max-width:700px){
+  body.admin-page .topbar{padding:15px 18px}
+  body.admin-page .container{width:94%}
+}
+</style>
+
+</head>
+<body class="admin-page">
+<header class="topbar">
+<div class="brand"><h1>Smart Faculty Substitute System</h1><p>Main Campus · BCA · HOD / Admin Portal</p></div>
+<a class="logout" href="{{ url_for('logout') }}">Logout</a>
+</header>
+
+<main class="container">
+<a class="back" href="{{ url_for('admin_dashboard') }}">← Back to Admin Dashboard</a>
+<h2>✅ Timetable Validation</h2>
+<p class="subtitle">Check the current timetable for structural conflicts and incomplete mappings before substitution processing.</p>
+
+<div class="status {% if not passed %}fail{% endif %}">
+{% if passed %}
+<h3>✅ Validation Passed</h3>
+<p>No critical timetable errors were detected.</p>
+{% else %}
+<h3>❌ Validation Failed</h3>
+<p>{{ error_count }} critical error(s) were detected. Fix these before relying on automatic substitution.</p>
+{% endif %}
+</div>
+
+<section class="stats">
+<div class="card"><div class="label">Critical Errors</div><div class="value red">{{ error_count }}</div></div>
+<div class="card"><div class="label">Warnings</div><div class="value orange">{{ warning_count }}</div></div>
+<div class="card"><div class="label">Total Issues</div><div class="value">{{ total_issues }}</div></div>
+</section>
+
+<section class="section">
+<h3>🔎 Validation Checks</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Check</th><th>Result</th><th>Status</th></tr></thead>
+<tbody>
+{% for name,count in checks %}
+<tr>
+<td>{{ name }}</td>
+<td>{{ count }}</td>
+<td>
+{% if 'Main Campus BCA timetable rows' in name %}<span class="badge ok">INFO</span>
+{% elif count == 0 %}<span class="badge ok">PASS</span>
+{% elif 'Incomplete' in name %}<span class="badge warning">WARNING</span>
+{% else %}<span class="badge error">CHECK</span>{% endif %}
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="section">
+<h3>⚠️ Detected Issues</h3>
+{% if issues %}
+<div class="table-wrap">
+<table>
+<thead><tr><th>Severity</th><th>Type</th><th>Location</th><th>Details</th></tr></thead>
+<tbody>
+{% for item in issues %}
+<tr>
+<td><span class="badge {% if item.severity == 'ERROR' %}error{% else %}warning{% endif %}">{{ item.severity }}</span></td>
+<td>{{ item.type }}</td><td>{{ item.location }}</td><td>{{ item.details }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="good-box">🎉 No timetable issues were detected. The current timetable structure is ready for the substitution engine.</div>
+{% endif %}
+<p class="muted" style="margin-top:16px;font-size:12px">This validation page is read-only. It does not modify the timetable database.</p>
+</section>
+</main>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Substitute Workspace | Smart Faculty Substitute System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>Smart Faculty Substitute System</h1>
+    <p>Main Campus · Substitution Workspace</p>
+  </div>
+  <a class="logout" href="{{ url_for('logout') }}">Logout</a>
+</header>
+<main class="container">
+  <section class="hero-card card">
+    <h2>🔄 Substitution Workspace</h2>
+    <p class="subtitle">Substitution recommendations and approvals are managed from the existing Admin Dashboard workflow.</p>
+    <a class="back" href="{{ url_for('admin_dashboard') }}">Open Admin Dashboard</a>
+  </section>
+</main>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

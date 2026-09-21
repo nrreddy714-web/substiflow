@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard | Smart Faculty Substitute System</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .action-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .action-button {
+            display: inline-block;
+            padding: 11px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            background: #2563eb;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .action-button:hover {
+            opacity: 0.9;
+        }
+
+        .timetable-button {
+            background: #0f766e;
+        }
+
+        .operations-button {
+            background: #ea580c;
+        }
+
+        /* =========================================================
+           SUBSTIFLOW TEACHER DASHBOARD THEME
+           Soft pale-green -> aqua -> blue gradient inspired by the
+           supplied reference image.
+           ========================================================= */
+        html, body { min-height: 100%; }
+
+        body {
+            background:
+                radial-gradient(circle at 7% 7%, rgba(236,255,194,.96) 0 10%, transparent 32%),
+                radial-gradient(circle at 78% 18%, rgba(81,224,218,.50) 0 12%, transparent 36%),
+                linear-gradient(135deg, #d9ffad 0%, #7ce9d1 42%, #28bce9 72%, #087be0 100%);
+            color: #082347;
+        }
+
+        .topbar {
+            background: rgba(4,18,48,.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,.18);
+        }
+
+        .card,
+        .info-card {
+            background: rgba(255,255,255,.91);
+            border: 1px solid rgba(255,255,255,.72);
+            box-shadow: 0 18px 45px rgba(4,40,88,.14), inset 0 1px 0 rgba(255,255,255,.78);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .card h2,
+        .card h3,
+        .info-card strong { color: #062554; }
+
+        .section-description,
+        .card p,
+        .info-card span { color: #29486f; }
+
+        th {
+            background: rgba(8,57,105,.96) !important;
+            color: #fff !important;
+        }
+
+        td {
+            background: rgba(255,255,255,.75);
+            color: #12355d;
+        }
+
+        tbody tr:hover td { background: rgba(236,255,230,.90); }
+
+        .empty-state {
+            background: rgba(245,255,252,.86) !important;
+            color: #17416b !important;
+            border: 1px solid rgba(16,103,152,.12);
+        }
+
+        .action-button {
+            box-shadow: 0 10px 24px rgba(4,45,95,.16);
+            transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+        }
+
+        .operations-button { background: linear-gradient(135deg,#0b6fe8,#0b9eea); }
+        .timetable-button { background: linear-gradient(135deg,#007f91,#10b7a4); }
+        .action-button:not(.operations-button):not(.timetable-button) {
+            background: linear-gradient(135deg,#173f89,#2769c7);
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            opacity: 1;
+            box-shadow: 0 14px 28px rgba(4,45,95,.22);
+        }
+
+        .logout { box-shadow: 0 8px 20px rgba(0,0,0,.18); }
+
+        .badge.success {
+            background: rgba(17,183,132,.16) !important;
+            color: #087451 !important;
+            border: 1px solid rgba(17,183,132,.28);
+        }
+
+        .badge.danger {
+            background: rgba(220,38,38,.11) !important;
+            color: #a51e1e !important;
+            border: 1px solid rgba(220,38,38,.20);
+        }
+
+        .hero-card { position: relative; overflow: hidden; }
+
+        .hero-card::after {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            right: -110px;
+            top: -120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(34,211,238,.28), transparent 68%);
+            pointer-events: none;
+        }
+
+        /* Premium dark glass cards - keeps the supplied gradient visible */
+        .card,
+        .info-card {
+            position: relative;
+            background: linear-gradient(145deg, rgba(8,28,52,.92), rgba(10,47,64,.84)) !important;
+            color: #f3f8ff !important;
+            border: 1px solid rgba(141,239,224,.20) !important;
+            box-shadow: 0 18px 42px rgba(3,25,52,.22), inset 0 1px 0 rgba(255,255,255,.08) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            overflow: hidden;
+        }
+
+        .card::before,
+        .info-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(255,255,255,.08), transparent 38%, rgba(17,224,201,.05));
+            pointer-events: none;
+        }
+
+        .card h2,
+        .card h3,
+        .info-card strong {
+            position: relative;
+            color: #ffffff !important;
+            text-shadow: 0 1px 10px rgba(0,0,0,.20);
+        }
+
+        .card p,
+        .section-description,
+        .info-card span {
+            position: relative;
+            color: #c8d9ea !important;
+        }
+
+        .profile-grid .info-card {
+            border-left: 3px solid rgba(74,236,202,.72) !important;
+            transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+        }
+
+        .profile-grid .info-card:hover {
+            transform: translateY(-3px);
+            border-left-color: #9dfb66 !important;
+            box-shadow: 0 20px 40px rgba(4,37,64,.30), inset 0 1px 0 rgba(255,255,255,.10) !important;
+        }
+
+        .table-wrapper {
+            position: relative;
+            border-radius: 14px;
+            overflow-x: auto;
+            background: rgba(3,17,35,.38);
+            border: 1px solid rgba(160,239,228,.12);
+        }
+
+        table {
+            border-collapse: separate !important;
+            border-spacing: 0;
+        }
+
+        th {
+            background: linear-gradient(135deg, #0a5363, #0d6f78) !important;
+            color: #ffffff !important;
+            border-bottom: 1px solid rgba(255,255,255,.14);
+        }
+
+        td {
+            background: rgba(6,29,49,.80) !important;
+            color: #e8f4ff !important;
+            border-bottom: 1px solid rgba(166,220,228,.10) !important;
+        }
+
+        tbody tr:hover td {
+            background: rgba(16,70,79,.86) !important;
+        }
+
+        .badge.success {
+            background: rgba(66,220,175,.16) !important;
+            color: #a7ffe7 !important;
+            border: 1px solid rgba(66,220,175,.32);
+        }
+
+        .badge.danger {
+            background: rgba(248,113,113,.14) !important;
+            color: #ffd0d0 !important;
+            border: 1px solid rgba(248,113,113,.24);
+        }
+
+        .empty-state {
+            background: linear-gradient(135deg, rgba(11,53,68,.88), rgba(10,43,59,.78)) !important;
+            color: #d9edf3 !important;
+            border: 1px solid rgba(129,231,218,.18) !important;
+        }
+
+        .hero-card,
+        .card {
+            box-shadow: 0 18px 48px rgba(2,26,54,.24), 0 0 0 1px rgba(255,255,255,.03);
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .profile-top-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #ffffff;
+            background: rgba(14, 116, 144, .72);
+            border: 1px solid rgba(255,255,255,.14);
+            font-weight: 700;
+            box-shadow: 0 8px 20px rgba(2,26,54,.16);
+            transition: transform .2s ease, background .2s ease;
+        }
+
+        .profile-top-button:hover {
+            transform: translateY(-2px);
+            background: rgba(17, 148, 163, .88);
+        }
+
+        .profile-section {
+            margin: 14px 0 18px;
+        }
+
+        .profile-details {
+            border-radius: 16px;
+            overflow: hidden;
+            background: linear-gradient(145deg, rgba(8,28,52,.78), rgba(10,47,64,.68));
+            border: 1px solid rgba(141,239,224,.20);
+            box-shadow: 0 14px 34px rgba(3,25,52,.16);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .profile-details summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: #ffffff;
+            font-weight: 800;
+            user-select: none;
+        }
+
+        .profile-details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .profile-summary-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, rgba(90,240,206,.24), rgba(39,171,233,.24));
+            border: 1px solid rgba(128,239,224,.24);
+        }
+
+        .profile-summary-right {
+            color: #bfe6ea;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .profile-chevron {
+            display: inline-block;
+            margin-left: 6px;
+            font-size: 18px;
+            transition: transform .2s ease;
+        }
+
+        .profile-details[open] .profile-chevron {
+            transform: rotate(180deg);
+        }
+
+        .profile-details .profile-grid {
+            padding: 0 14px 14px;
+            gap: 12px;
+        }
+
+        .profile-grid {
+            gap: 14px;
+        }
+
+        .action-button {
+            border: 1px solid rgba(255,255,255,.10);
+        }
+
+        .logout {
+            border: 1px solid rgba(255,255,255,.10);
+        }
+
+        @media (max-width: 700px) {
+            .card, .info-card {
+                border-radius: 16px;
+            }
+
+            .topbar-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .profile-top-button,
+            .logout {
+                min-height: 40px;
+            }
+
+            .profile-details summary {
+                align-items: flex-start;
+            }
+
+            .profile-summary-right {
+                white-space: nowrap;
+            }
+        }
+
+    
+/* ================= TEACHER PORTAL THEME ================= */
+:root{
+  --teacher-bg-a:#efffc8;
+  --teacher-bg-b:#66ead6;
+  --teacher-bg-c:#169be8;
+  --teacher-glass:rgba(8,24,48,.86);
+  --teacher-glass-2:rgba(12,42,61,.82);
+  --teacher-line:rgba(103,239,220,.38);
+  --teacher-text:#f8fbff;
+  --teacher-muted:#c8d9ec;
+  --teacher-cyan:#44f1d0;
+}
+html,body{min-height:100%;}
+body{
+  background:
+    radial-gradient(circle at 12% 8%, rgba(235,255,182,.92), transparent 24%),
+    radial-gradient(circle at 88% 18%, rgba(69,235,220,.30), transparent 30%),
+    linear-gradient(135deg,var(--teacher-bg-a) 0%,var(--teacher-bg-b) 46%,var(--teacher-bg-c) 100%) !important;
+  background-attachment:scroll !important;
+  color:var(--teacher-text) !important;
+}
+.topbar{
+  background:linear-gradient(135deg,rgba(4,18,35,.98),rgba(8,37,58,.98)) !important;
+  border-bottom:1px solid rgba(68,241,208,.25);
+  box-shadow:0 8px 24px rgba(2,18,32,.22);
+}
+.container{position:relative;z-index:1;}
+.card,.hero-card,.info-card,.profile-card,.table-card,.section-card,.panel{
+  background:linear-gradient(145deg,var(--teacher-glass),var(--teacher-glass-2)) !important;
+  color:var(--teacher-text) !important;
+  border:1px solid var(--teacher-line) !important;
+  box-shadow:0 12px 28px rgba(2,22,38,.20) !important;
+}
+h1,h2,h3,h4,h5,h6,strong,b{color:#fff !important;}
+p,.subtitle,.sub,.muted,.label,.reason,.note,.description{color:var(--teacher-muted) !important;}
+label{color:#e6f7ff !important;font-weight:700;}
+input,select,textarea{
+  background:rgba(3,18,34,.72) !important;
+  color:#fff !important;
+  border:1px solid rgba(122,233,222,.35) !important;
+}
+input::placeholder,textarea::placeholder{color:#91a9bf !important;}
+.back{color:#0b263c !important;background:rgba(255,255,255,.78) !important;border:1px solid rgba(5,44,70,.15);}
+.back:hover{background:#fff !important;color:#06213b !important;}
+.action-button,.btn{box-shadow:0 7px 16px rgba(0,0,0,.18);}
+.btn,.action-button{color:#fff !important;}
+table{color:#eef8ff !important;}
+th{
+  background:linear-gradient(135deg,#0b2a46,#124c60) !important;
+  color:#f8fbff !important;
+  border-bottom:1px solid rgba(119,236,223,.35) !important;
+}
+td{
+  background:rgba(7,28,48,.72) !important;
+  color:#edf7ff !important;
+  border-color:rgba(119,236,223,.15) !important;
+}
+tr:hover td,tr:active td{background:rgba(17,67,83,.88) !important;color:#fff !important;}
+.badge.success,.assigned{background:rgba(26,195,141,.22) !important;color:#7ff8cf !important;border:1px solid rgba(127,248,207,.35);}
+.badge.pending{background:rgba(245,183,46,.20) !important;color:#ffd66d !important;border:1px solid rgba(255,214,109,.35);}
+.badge.danger{background:rgba(255,79,103,.18) !important;color:#ff9ba9 !important;border:1px solid rgba(255,155,169,.35);}
+.empty{background:rgba(3,20,37,.50) !important;color:#c9d9e7 !important;border:1px dashed rgba(120,235,221,.25);}
+.stat,.info-card,.profile-card{color:#fff !important;}
+@media(max-width:700px){
+  .container{width:94% !important;}
+  .card,.hero-card,.info-card,.profile-card,.table-card{border-radius:16px !important;}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto !important;transition:none !important;animation:none !important;}}
+
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <div>
+        <h1>Smart Faculty Substitute System</h1>
+        <p>Main Campus · Teacher Portal</p>
+    </div>
+
+    <div class="topbar-actions">
+        <a href="#teacher-profile" class="profile-top-button">👤 My Profile</a>
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- WELCOME -->
+    <section class="card hero-card">
+        <h2>Welcome, {{ teacher.teacher_name }} 👋</h2>
+
+        <p>
+            Manage your faculty information and view your substitute
+            teaching duties.
+        </p>
+
+        <div class="action-row">
+            <a href="{{ url_for('admin_today') if session.get('role') == 'ADMIN' else url_for('teacher_today') }}"
+               class="action-button operations-button">
+                📅 Today's Operations
+            </a>
+
+            <a href="{{ url_for('teacher_timetable') }}"
+               class="action-button timetable-button">
+                📚 My Timetable
+            </a>
+
+            <a href="{{ url_for('teacher_unavailability') }}"
+               class="action-button">
+                🕒 Request Period Unavailability
+            </a>
+        </div>
+    </section>
+
+
+    <!-- TEACHER PROFILE -->
+    <section class="profile-section" id="teacher-profile">
+        <details class="profile-details">
+            <summary>
+                <span class="profile-summary-left">
+                    <span class="profile-icon">👤</span>
+                    <span>Teacher Profile</span>
+                </span>
+                <span class="profile-summary-right">Tap to view <span class="profile-chevron">⌄</span></span>
+            </summary>
+
+            <div class="profile-grid">
+                <div class="info-card">
+                    <span>Teacher ID</span>
+                    <strong>{{ teacher.teacher_id }}</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>Teacher Name</span>
+                    <strong>{{ teacher.teacher_name }}</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>Department</span>
+                    <strong>{{ teacher.department or 'None' }}</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>Designation</span>
+                    <strong>{{ teacher.designation or 'Faculty' }}</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>Campus / Scope</span>
+                    <strong>{{ teacher.campus or 'Main Campus' }}</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>Substitute Eligibility</span>
+                    {% if teacher.is_substitute_eligible %}
+                        <span class="badge success">YES</span>
+                    {% else %}
+                        <span class="badge danger">NO</span>
+                    {% endif %}
+                </div>
+            </div>
+        </details>
+    </section>
+
+
+    <!-- TODAY'S SUBSTITUTE DUTIES -->
+    <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+            <div>
+                <h2 style="margin-bottom:6px;">📅 Today's Substitute Duties</h2>
+                <p class="section-description" style="margin-top:0;">Only confirmed duties for today are shown here.</p>
+            </div>
+            <span style="font-weight:700;color:#64748b;">{{ today_substitutions|length }} duty{{ '' if today_substitutions|length == 1 else 'ies' }}</span>
+        </div>
+
+        {% if today_substitutions %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Absent Teacher</th>
+                        <th>Campus</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in today_substitutions %}
+                    <tr>
+                        <td><strong>P{{ item.period_no }}</strong></td>
+                        <td>{{ item.class_name }}</td>
+                        <td>{{ item.subject_name }}</td>
+                        <td>{{ item.absent_teacher or '—' }}</td>
+                        <td>{{ item.campus }}</td>
+                        <td><span class="badge success">{{ item.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">✅ No confirmed substitute duties for today.</div>
+        {% endif %}
+    </section>
+
+
+    <!-- UPCOMING SUBSTITUTE DUTIES -->
+    <section class="card">
+        <h2>📆 Upcoming Substitute Duties</h2>
+        <p class="section-description">Future duties already approved by the Admin.</p>
+
+        {% if upcoming_substitutions %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Period</th>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Absent Teacher</th>
+                        <th>Campus</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in upcoming_substitutions %}
+                    <tr>
+                        <td>{{ item.assignment_date }}</td>
+                        <td>P{{ item.period_no }}</td>
+                        <td>{{ item.class_name }}</td>
+                        <td>{{ item.subject_name }}</td>
+                        <td>{{ item.absent_teacher or '—' }}</td>
+                        <td>{{ item.campus }}</td>
+                        <td><span class="badge success">{{ item.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">No upcoming confirmed substitute duties.</div>
+        {% endif %}
+    </section>
+
+
+    <!-- SYSTEM INFORMATION -->
+    <section class="card">
+        <h2>System Information</h2>
+
+        <p class="section-description">
+            Substitute assignments are generated by the recommendation
+            engine and finalized by the Main Campus Admin.
+        </p>
+
+        <p>
+            <strong>Recommendation process:</strong>
+            Available teachers are checked based on timetable conflicts,
+            absence, unavailability, campus movement rules,
+            subject eligibility, and workload fairness.
+        </p>
+    </section>
+
+</main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

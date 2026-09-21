@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Faculty Timetables | SubstiFlow</title>
+
+<!-- Keep the original project stylesheet, but all page-specific timetable styles below override it. -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<style>
+/* ==========================================================
+   SUBSTIFLOW — FACULTY TIMETABLES
+   Midnight Blue + Electric Cyan
+   ========================================================== */
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    margin:0 !important;
+    min-height:100% !important;
+}
+
+body.admin-page{
+    min-height:100vh !important;
+    font-family:Arial,Helvetica,sans-serif !important;
+    color:#eaf7ff !important;
+    background:
+        radial-gradient(circle at 8% 0%,rgba(34,211,238,.15),transparent 28%),
+        radial-gradient(circle at 92% 8%,rgba(99,102,241,.15),transparent 30%),
+        radial-gradient(circle at 50% 100%,rgba(6,182,212,.10),transparent 35%),
+        linear-gradient(135deg,#020617 0%,#06152d 48%,#082b3e 100%) !important;
+}
+
+body.admin-page::before,
+body.admin-page::after{
+    content:"" !important;
+    position:fixed !important;
+    inset:0 !important;
+    pointer-events:none !important;
+    z-index:0 !important;
+}
+
+body.admin-page::before{
+    background:radial-gradient(circle at 50% 0%,rgba(34,211,238,.05),transparent 40%) !important;
+}
+
+body.admin-page::after{
+    background:linear-gradient(180deg,transparent 70%,rgba(0,0,0,.16)) !important;
+}
+
+body.admin-page .topbar{
+    position:relative !important;
+    z-index:2 !important;
+    background:rgba(2,10,26,.96) !important;
+    color:#f7fbff !important;
+    padding:18px 30px !important;
+    display:flex !important;
+    justify-content:space-between !important;
+    align-items:center !important;
+    gap:20px !important;
+    border-bottom:1px solid rgba(34,211,238,.24) !important;
+    box-shadow:0 8px 30px rgba(0,0,0,.28) !important;
+}
+
+body.admin-page .brand h1{
+    margin:0 !important;
+    color:#f7fbff !important;
+    font-size:24px !important;
+}
+
+body.admin-page .brand p{
+    margin:5px 0 0 !important;
+    color:#b8cce3 !important;
+    font-size:13px !important;
+}
+
+body.admin-page .logout{
+    display:inline-block !important;
+    background:#dc2626 !important;
+    color:#fff !important;
+    text-decoration:none !important;
+    padding:10px 16px !important;
+    border-radius:8px !important;
+    font-weight:700 !important;
+}
+
+body.admin-page .container{
+    position:relative !important;
+    z-index:1 !important;
+    width:min(1250px,96%) !important;
+    margin:30px auto !important;
+}
+
+body.admin-page .back{
+    display:inline-block !important;
+    margin-bottom:18px !important;
+    color:#67e8f9 !important;
+    text-decoration:none !important;
+    font-weight:700 !important;
+}
+
+body.admin-page .page-title{
+    margin-bottom:20px !important;
+}
+
+body.admin-page .page-title h2{
+    margin:0 !important;
+    color:#f7fbff !important;
+    font-size:28px !important;
+}
+
+body.admin-page .page-title p{
+    margin:7px 0 !important;
+    color:#b8cce3 !important;
+}
+
+body.admin-page .info-bar{
+    display:flex !important;
+    gap:10px !important;
+    flex-wrap:wrap !important;
+    margin-bottom:18px !important;
+}
+
+body.admin-page .info-chip{
+    padding:8px 12px !important;
+    border-radius:999px !important;
+    background:#0b2b42 !important;
+    color:#79e9ff !important;
+    border:1px solid rgba(34,211,238,.25) !important;
+    font-size:12px !important;
+    font-weight:700 !important;
+}
+
+body.admin-page .section{
+    background:linear-gradient(145deg,rgba(8,22,43,.97),rgba(8,35,52,.95)) !important;
+    color:#eaf7ff !important;
+    border:1px solid rgba(96,221,241,.20) !important;
+    border-radius:14px !important;
+    padding:22px !important;
+    margin-bottom:24px !important;
+    box-shadow:0 16px 36px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.03) !important;
+}
+
+body.admin-page .faculty-toolbar{
+    display:flex !important;
+    justify-content:space-between !important;
+    align-items:center !important;
+    gap:14px !important;
+    flex-wrap:wrap !important;
+    margin-bottom:16px !important;
+}
+
+body.admin-page .faculty-search{
+    width:min(380px,100%) !important;
+    padding:11px 13px !important;
+    border-radius:9px !important;
+    outline:none !important;
+    background:#07172d !important;
+    color:#eef7ff !important;
+    border:1px solid rgba(96,221,241,.28) !important;
+}
+
+body.admin-page .faculty-search::placeholder{
+    color:#7890aa !important;
+}
+
+body.admin-page .faculty-search:focus{
+    border-color:#22d3ee !important;
+    box-shadow:0 0 0 3px rgba(34,211,238,.12) !important;
+}
+
+body.admin-page .faculty-count{
+    color:#9fb8d1 !important;
+    font-size:12px !important;
+    font-weight:700 !important;
+}
+
+body.admin-page .faculty-list{
+    display:grid !important;
+    gap:12px !important;
+}
+
+body.admin-page .faculty-card{
+    display:block !important;
+    background:linear-gradient(145deg,rgba(8,22,43,.98),rgba(8,35,52,.95)) !important;
+    border:1px solid rgba(96,221,241,.20) !important;
+    border-radius:12px !important;
+    overflow:hidden !important;
+}
+
+body.admin-page .faculty-card summary{
+    list-style:none !important;
+    cursor:pointer !important;
+    padding:14px 16px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:12px !important;
+    background:linear-gradient(90deg,#0a203b,#0a3040) !important;
+    color:#f2fbff !important;
+}
+
+body.admin-page .faculty-card summary::-webkit-details-marker{
+    display:none !important;
+}
+
+body.admin-page .faculty-name{
+    color:#f4fbff !important;
+    font-weight:800 !important;
+}
+
+body.admin-page .faculty-meta{
+    color:#9eb8cf !important;
+    font-size:12px !important;
+    margin-top:3px !important;
+}
+
+body.admin-page .faculty-arrow{
+    color:#67e8f9 !important;
+    font-size:16px !important;
+    transition:transform .2s ease !important;
+}
+
+body.admin-page .faculty-card[open] .faculty-arrow{
+    transform:rotate(180deg) !important;
+}
+
+body.admin-page .faculty-grid-wrap{
+    overflow-x:auto !important;
+    padding:14px !important;
+    background:#061427 !important;
+}
+
+/* ----------------------------------------------------------
+   IMPORTANT FIX:
+   Every timetable row and cell has an explicit dark background.
+   This prevents global nth-child / hover / table rules from
+   creating white rows.
+   ---------------------------------------------------------- */
+body.admin-page table.faculty-grid{
+    width:100% !important;
+    min-width:900px !important;
+    border-collapse:separate !important;
+    border-spacing:4px !important;
+    background:#061427 !important;
+    color:#eaf7ff !important;
+}
+
+body.admin-page table.faculty-grid thead,
+body.admin-page table.faculty-grid tbody,
+body.admin-page table.faculty-grid tr,
+body.admin-page table.faculty-grid tbody tr,
+body.admin-page table.faculty-grid tbody tr:nth-child(1),
+body.admin-page table.faculty-grid tbody tr:nth-child(2),
+body.admin-page table.faculty-grid tbody tr:nth-child(3),
+body.admin-page table.faculty-grid tbody tr:nth-child(4),
+body.admin-page table.faculty-grid tbody tr:nth-child(5),
+body.admin-page table.faculty-grid tbody tr:nth-child(6){
+    background:#061427 !important;
+}
+
+body.admin-page table.faculty-grid th{
+    background:linear-gradient(180deg,#0c2442,#0a1b34) !important;
+    color:#dff8ff !important;
+    border:1px solid rgba(34,211,238,.20) !important;
+    border-radius:7px !important;
+    padding:9px 8px !important;
+    font-size:11px !important;
+    text-align:center !important;
+}
+
+body.admin-page table.faculty-grid th:first-child{
+    text-align:left !important;
+}
+
+body.admin-page table.faculty-grid td,
+body.admin-page table.faculty-grid tbody tr td,
+body.admin-page table.faculty-grid tbody tr:nth-child(odd) td,
+body.admin-page table.faculty-grid tbody tr:nth-child(even) td{
+    background:#091a31 !important;
+    color:#eaf5ff !important;
+    border:1px solid rgba(128,164,194,.18) !important;
+    border-radius:7px !important;
+    padding:9px 8px !important;
+    vertical-align:top !important;
+    min-width:125px !important;
+}
+
+body.admin-page table.faculty-grid tbody tr td:first-child,
+body.admin-page table.faculty-grid tbody tr:nth-child(odd) td:first-child,
+body.admin-page table.faculty-grid tbody tr:nth-child(even) td:first-child{
+    background:#0d2744 !important;
+    color:#e5f7ff !important;
+    min-width:100px !important;
+    font-weight:800 !important;
+}
+
+body.admin-page table.faculty-grid tbody tr:hover td,
+body.admin-page table.faculty-grid tbody tr:focus-within td,
+body.admin-page table.faculty-grid tbody tr:active td{
+    background:#102847 !important;
+    color:#ffffff !important;
+}
+
+body.admin-page table.faculty-grid tbody tr:hover td:first-child,
+body.admin-page table.faculty-grid tbody tr:focus-within td:first-child,
+body.admin-page table.faculty-grid tbody tr:active td:first-child{
+    background:#123353 !important;
+}
+
+body.admin-page .faculty-subject{
+    color:#f4fbff !important;
+    font-weight:800 !important;
+    font-size:12px !important;
+    line-height:1.25 !important;
+}
+
+body.admin-page .faculty-class{
+    color:#c0d2e5 !important;
+    font-size:11px !important;
+    margin-top:4px !important;
+}
+
+body.admin-page .faculty-campus{
+    color:#9eb8cf !important;
+    font-size:10px !important;
+    margin-top:3px !important;
+}
+
+body.admin-page .faculty-type{
+    display:inline-block !important;
+    margin-top:5px !important;
+    padding:3px 6px !important;
+    border-radius:999px !important;
+    background:#0b3047 !important;
+    color:#79e9ff !important;
+    border:1px solid rgba(34,211,238,.18) !important;
+    font-size:9px !important;
+    font-weight:800 !important;
+}
+
+body.admin-page .faculty-free{
+    color:#7f97ae !important;
+    font-style:italic !important;
+    font-size:11px !important;
+}
+
+/* Lab cells may be highlighted, but never white. */
+body.admin-page table.faculty-grid td.faculty-lab,
+body.admin-page table.faculty-grid tbody tr td.faculty-lab,
+body.admin-page table.faculty-grid tbody tr:nth-child(odd) td.faculty-lab,
+body.admin-page table.faculty-grid tbody tr:nth-child(even) td.faculty-lab{
+    background:#30250f !important;
+    color:#fff3c4 !important;
+    border-color:#8c6a19 !important;
+}
+
+body.admin-page table.faculty-grid tbody tr:hover td.faculty-lab,
+body.admin-page table.faculty-grid tbody tr:focus-within td.faculty-lab,
+body.admin-page table.faculty-grid tbody tr:active td.faculty-lab{
+    background:#3b2c0f !important;
+}
+
+body.admin-page .faculty-empty{
+    padding:18px !important;
+    text-align:center !important;
+    background:rgba(9,25,48,.84) !important;
+    color:#abc1d8 !important;
+    border:1px dashed rgba(96,221,241,.22) !important;
+    border-radius:10px !important;
+}
+
+@media(max-width:700px){
+    body.admin-page .topbar{
+        flex-direction:column !important;
+        align-items:flex-start !important;
+        padding:15px 18px !important;
+    }
+    body.admin-page .container{
+        width:94% !important;
+    }
+}
+</style>
+</head>
+
+<body class="admin-page">
+<header class="topbar">
+    <div class="brand">
+        <h1>SubstiFlow</h1>
+        <p>Main Campus · BCA · HOD / Admin Portal</p>
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+</header>
+
+<main class="container">
+    <a href="{{ url_for('admin_dashboard') }}" class="back">← Back to Admin Dashboard</a>
+
+    <div class="page-title">
+        <h2>👩‍🏫 Faculty Timetables</h2>
+        <p>View the complete Monday–Saturday timetable for every active teacher.</p>
+    </div>
+
+    <div class="info-bar">
+        <span class="info-chip">P1–P3 · Morning</span>
+        <span class="info-chip">P4–P6 · Afternoon</span>
+        <span class="info-chip">Labs shown across occupied periods</span>
+    </div>
+
+    <section class="section">
+        <div class="faculty-toolbar">
+            <input
+                id="facultySearch"
+                class="faculty-search"
+                type="search"
+                placeholder="Search teacher or department..."
+                autocomplete="off"
+            >
+            <div class="faculty-count">
+                <span id="facultyVisibleCount">{{ faculty_timetables|length }}</span> active faculty
+            </div>
+        </div>
+
+        {% if faculty_timetables %}
+        <div class="faculty-list" id="facultyList">
+            {% for faculty in faculty_timetables %}
+            <details
+                class="faculty-card"
+                data-search="{{ ((faculty.teacher_name or '') ~ ' ' ~ (faculty.department or ''))|lower }}"
+                {% if loop.first %}open{% endif %}
+            >
+                <summary>
+                    <div>
+                        <div class="faculty-name">{{ faculty.teacher_name }}</div>
+                        <div class="faculty-meta">{{ faculty.department or 'Department not specified' }}</div>
+                    </div>
+                    <span class="faculty-arrow">⌄</span>
+                </summary>
+
+                <div class="faculty-grid-wrap">
+                    <table class="faculty-grid">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Period 1</th>
+                                <th>Period 2</th>
+                                <th>Period 3</th>
+                                <th>Period 4</th>
+                                <th>Period 5</th>
+                                <th>Period 6</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        {% for day_code, day_name in [('MON','Monday'),('TUE','Tuesday'),('WED','Wednesday'),('THU','Thursday'),('FRI','Friday'),('SAT','Saturday')] %}
+                            <tr>
+                                <td>{{ day_name }}</td>
+
+                                {% for period in range(1,7) %}
+                                    {% set item = faculty.grid.get(day_code, {}).get(period) %}
+
+                                    <td{% if item and item.get('lab_expanded') %} class="faculty-lab"{% endif %}>
+                                        {% if item %}
+                                            <div class="faculty-subject">
+                                                {{ item.get('display_subject') or 'Subject' }}
+                                            </div>
+
+                                            {% set shown_class = item.get('display_class') or '' %}
+                                            {% set shown_subject = item.get('display_subject') or '' %}
+
+                                            {% if shown_class and shown_class != '—' and shown_class|trim|lower != shown_subject|trim|lower %}
+                                                <div class="faculty-class">{{ shown_class }}</div>
+                                            {% endif %}
+
+                                            <div class="faculty-campus">
+                                                {{ item.get('display_campus') or item.get('campus') or '—' }}
+                                            </div>
+
+                                            {% if item.get('period_type') %}
+                                                <span class="faculty-type">{{ item.get('period_type') }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="faculty-free">Free</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div class="faculty-empty">No active faculty records were returned from the database.</div>
+        {% endif %}
+    </section>
+</main>
+
+<script>
+(function(){
+    const input = document.getElementById('facultySearch');
+    const list = document.getElementById('facultyList');
+    const count = document.getElementById('facultyVisibleCount');
+
+    if (!input || !list || !count) return;
+
+    input.addEventListener('input', function(){
+        const term = this.value.trim().toLowerCase();
+        let visible = 0;
+
+        list.querySelectorAll('.faculty-card').forEach(function(card){
+            const match = !term || (card.dataset.search || '').includes(term);
+            card.style.display = match ? '' : 'none';
+            if (match) visible += 1;
+        });
+
+        count.textContent = visible;
+    });
+})();
+</script>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
