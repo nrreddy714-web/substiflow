@@ -5,109 +5,752 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Dashboard | Smart Faculty Substitute System</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
 <style>
+/* =========================================================
+   SubstiFlow Admin Dashboard
+   Simple + clear + beautiful
+   Existing backend/routes are preserved.
+   ========================================================= */
+
 *{box-sizing:border-box}
+
 :root{
-  --bg:#020617;
-  --bg2:#07152f;
-  --bg3:#062a3b;
-  --panel:rgba(8,20,42,.86);
-  --panel2:rgba(11,31,58,.90);
-  --line:rgba(34,211,238,.24);
+  --bg:#06111f;
+  --bg-soft:#0a1a2e;
+  --panel:rgba(10,26,46,.92);
+  --panel-2:rgba(13,34,59,.96);
+  --border:rgba(103,232,249,.16);
+  --border-strong:rgba(103,232,249,.30);
   --cyan:#22d3ee;
-  --cyan2:#67e8f9;
-  --indigo:#6366f1;
+  --cyan-soft:#67e8f9;
+  --blue:#60a5fa;
+  --green:#22c55e;
+  --amber:#f59e0b;
+  --red:#ef4444;
+  --violet:#8b5cf6;
   --text:#f8fafc;
-  --muted:#a8b6cc;
+  --muted:#9fb1c8;
 }
+
+html{scroll-behavior:smooth}
+
 body{
   margin:0;
-  font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
   color:var(--text);
   background:
-    radial-gradient(circle at 8% 8%,rgba(34,211,238,.16),transparent 28%),
-    radial-gradient(circle at 92% 14%,rgba(99,102,241,.18),transparent 30%),
-    radial-gradient(circle at 55% 100%,rgba(14,116,144,.14),transparent 32%),
-    linear-gradient(135deg,var(--bg),var(--bg2) 52%,var(--bg3));
-  min-height:100vh;
+    radial-gradient(circle at 8% 5%,rgba(34,211,238,.15),transparent 25%),
+    radial-gradient(circle at 92% 8%,rgba(99,102,241,.16),transparent 25%),
+    linear-gradient(135deg,#020617 0%,#06152b 55%,#071d32 100%);
 }
+
 .topbar{
-  background:rgba(2,6,23,.78);
+  position:sticky;
+  top:0;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:15px clamp(18px,3vw,34px);
+  background:rgba(2,6,23,.88);
+  border-bottom:1px solid rgba(103,232,249,.14);
   backdrop-filter:blur(16px);
   -webkit-backdrop-filter:blur(16px);
-  color:#fff;
-  padding:18px 30px;
-  display:flex;
-  justify-content:space-between;
+}
+
+.brand h1{
+  margin:0;
+  font-size:clamp(18px,2vw,24px);
+  font-weight:850;
+  letter-spacing:-.025em;
+}
+
+.brand p{
+  margin:4px 0 0;
+  color:#9fb1c8;
+  font-size:12px;
+}
+
+.logout{
+  display:inline-flex;
   align-items:center;
+  justify-content:center;
+  min-height:40px;
+  padding:0 14px;
+  color:#fff!important;
+  background:#dc2626;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:10px;
+  text-decoration:none!important;
+  font-size:13px;
+  font-weight:800;
+  transition:.18s ease;
+}
+
+.logout:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.05);
+}
+
+.container{
+  width:min(1220px,94%);
+  margin:28px auto 52px;
+}
+
+.page-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
   gap:20px;
-  border-bottom:1px solid rgba(34,211,238,.16);
-  box-shadow:0 10px 30px rgba(0,0,0,.28);
+  margin-bottom:20px;
 }
-.brand h1{margin:0;font-size:24px;letter-spacing:-.3px}.brand p{margin:5px 0 0;font-size:13px;color:#b6c6dc}.logout{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;text-decoration:none;padding:10px 16px;border-radius:9px;font-weight:700;box-shadow:0 8px 18px rgba(220,38,38,.18)}.logout:hover{transform:translateY(-1px)}
-.container{width:min(1250px,96%);margin:30px auto 50px}.page-title h2{margin:0;font-size:30px;color:#fff}.page-title p{margin:7px 0;color:var(--muted)}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.action-link{display:inline-block;text-decoration:none;color:#fff;background:linear-gradient(135deg,#0891b2,#06b6d4);padding:10px 15px;border-radius:9px;font-weight:700;font-size:13px;border:1px solid rgba(103,232,249,.26);box-shadow:0 8px 20px rgba(6,182,212,.13)}.action-link:hover{transform:translateY(-1px);filter:brightness(1.05)}.secondary{background:linear-gradient(135deg,#0f766e,#0d9488)!important}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}.stat-card{background:linear-gradient(180deg,#102743,#0a1a30) !important;border:1px solid rgba(148,163,184,.15);border-radius:15px;padding:20px;box-shadow:0 14px 35px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.03);border-top:3px solid #22d3ee}.stat-card.pending{border-top-color:#f59e0b}.stat-card.assigned{border-top-color:#22c55e}.stat-card.rejected{border-top-color:#ef4444}.stat-card.admin{border-top-color:#8b5cf6}.stat-label{color:#c2d1e1;font-size:13px;margin-bottom:8px}.stat-value{font-size:30px;font-weight:900;color:#ffffff}
-.section{background:linear-gradient(180deg,#091a31 0%,#071426 100%) !important;border:1px solid rgba(34,211,238,.28) !important;border-radius:18px;padding:22px;margin-bottom:24px;box-shadow:0 18px 42px rgba(0,0,0,.34),0 0 0 1px rgba(99,102,241,.08) inset !important;color:#f8fafc !important}.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.section-header h3{margin:0;font-size:21px;color:#ffffff !important;font-weight:800;letter-spacing:-.2px;text-shadow:0 0 12px rgba(103,232,249,.08)}.section-header p{margin:5px 0 0;color:#b9c9dc !important;font-size:13px}
-.table-wrapper{overflow-x:auto;border-radius:12px}table{width:100%;min-width:900px;border-collapse:separate;border-spacing:0 7px}th,td{padding:13px 11px;text-align:left;vertical-align:middle;font-size:13px}th{background:linear-gradient(135deg,#12365b,#0c2a49);color:#f4fbff;font-weight:800;letter-spacing:.15px;border-top:1px solid rgba(103,232,249,.28);border-bottom:1px solid rgba(103,232,249,.20)} tbody tr td{background:linear-gradient(180deg,rgba(18,40,67,.96),rgba(11,28,50,.96));color:#f3f8ff;border-top:1px solid rgba(103,232,249,.10);border-bottom:1px solid rgba(103,232,249,.10)}tbody tr td:first-child{border-left:1px solid rgba(148,163,184,.08);border-radius:9px 0 0 9px}tbody tr td:last-child{border-right:1px solid rgba(148,163,184,.08);border-radius:0 9px 9px 0}tbody tr:hover td{background:rgba(13,38,68,.96) !important;color:#f3f8ff !important;border-color:rgba(34,211,238,.22) !important}tbody tr:active td,tbody tr:focus-within td{background:rgba(13,38,68,.96) !important;color:#f3f8ff !important;border-color:rgba(34,211,238,.22) !important}tbody tr:nth-child(odd) td{background:linear-gradient(180deg,rgba(18,40,67,.96),rgba(11,28,50,.96)) !important;color:#f3f8ff !important}tbody tr:nth-child(even) td{background:linear-gradient(180deg,rgba(15,35,60,.96),rgba(9,25,46,.96)) !important;color:#f3f8ff !important}tbody tr:hover:nth-child(odd) td,tbody tr:hover:nth-child(even) td{background:rgba(13,38,68,.96) !important;color:#f3f8ff !important}.score{font-weight:900;color:#67e8f9;text-shadow:0 0 10px rgba(34,211,238,.18)}.badge{display:inline-block;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.2px}.badge.pending{background:#3b2a08;color:#ffd76a;border:1px solid rgba(245,190,60,.55);box-shadow:0 0 0 1px rgba(245,190,60,.05) inset}.badge.assigned{background:#0b3a25;color:#86efac;border:1px solid rgba(74,222,128,.45)}.reason{max-width:330px;line-height:1.5;color:#d5e0ec}.button-row{display:flex;gap:7px;flex-wrap:wrap}.btn{border:0;border-radius:8px;padding:7px 11px;color:#fff;font-weight:700;cursor:pointer;font-size:12px;transition:.2s}.btn:hover{transform:translateY(-1px);filter:brightness(1.08)}.btn-approve{background:linear-gradient(135deg,#0f9f53,#22c55e);box-shadow:0 6px 14px rgba(34,197,94,.16)}.btn-reject{background:linear-gradient(135deg,#c52222,#ef4444);box-shadow:0 6px 14px rgba(239,68,68,.16)}.btn-manual{background:linear-gradient(135deg,#7c3aed,#6366f1);text-decoration:none;display:inline-block;box-shadow:0 6px 14px rgba(99,102,241,.16)}.empty{padding:25px;text-align:center;background:rgba(7,22,40,.95) !important;border:1px dashed rgba(103,232,249,.28);border-radius:11px;color:#c3d1df}.note{margin-top:10px;font-size:12px;color:#b8c9dc !important}
-/* Faculty timetable page launcher styles retained for compatibility */
-.faculty-toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}.faculty-search{width:min(360px,100%);padding:11px 13px;border:1px solid rgba(103,232,249,.32);border-radius:9px;background:rgba(3,13,28,.92);color:#ffffff;font-size:13px;outline:none}.faculty-search::placeholder{color:#7890ad}.faculty-search:focus{border-color:#22d3ee;box-shadow:0 0 0 3px rgba(34,211,238,.12)}.faculty-count{font-size:12px;color:#d0deed;font-weight:800}.faculty-list{display:grid;gap:12px}.faculty-card{border:1px solid rgba(34,211,238,.14);border-radius:12px;background:rgba(7,20,40,.82);overflow:hidden}.faculty-card summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(90deg,rgba(8,28,53,.96),rgba(10,38,63,.82))}.faculty-card summary::-webkit-details-marker{display:none}.faculty-name{font-weight:800;color:#fff}.faculty-meta{font-size:12px;color:#a8b6cc;margin-top:3px}.faculty-arrow{font-size:16px;color:#67e8f9;transition:transform .2s}.faculty-card[open] .faculty-arrow{transform:rotate(180deg)}.faculty-grid-wrap{overflow-x:auto;padding:14px}.faculty-grid{width:100%;min-width:900px;border-collapse:separate;border-spacing:4px}.faculty-grid th{background:#12375f;color:#fff;border:0;border-radius:7px;padding:9px 8px;font-size:11px;text-align:center}.faculty-grid th:first-child{text-align:left}.faculty-grid td{background:rgba(9,28,51,.9);border:1px solid rgba(148,163,184,.1);border-radius:7px;padding:9px 8px;vertical-align:top;min-width:125px}.faculty-grid td:first-child{background:rgba(14,42,72,.92);font-weight:800;color:#d7e5f6;min-width:100px}.faculty-subject{font-weight:800;color:#fff;font-size:12px;line-height:1.25}.faculty-class{font-size:11px;color:#b0bfd2;margin-top:4px}.faculty-campus{font-size:10px;color:#8ea4bd;margin-top:3px}.faculty-type{display:inline-block;margin-top:5px;padding:3px 6px;border-radius:999px;background:rgba(34,211,238,.12);color:#67e8f9;font-size:9px;font-weight:800}.faculty-free{color:#7f93ab;font-style:italic;font-size:11px}.faculty-lab{background:rgba(120,53,15,.18)!important;border-color:rgba(251,146,60,.24)!important}.faculty-empty{padding:18px;text-align:center;background:rgba(8,24,47,.72);border-radius:10px;color:#9fb2ca}
-@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.topbar{flex-direction:column;align-items:flex-start}.faculty-grid-wrap{padding:10px}.faculty-grid{min-width:820px}}@media(max-width:560px){.stats{grid-template-columns:1fr}.container{width:94%}.page-title h2{font-size:25px}.topbar{padding:16px 18px}}
 
-/* Final dark-theme contrast overrides */
-main.container section.section, main.container .section {
-  background:linear-gradient(180deg,#091a31 0%,#071426 100%) !important;
-  color:#f8fafc !important;
+.page-title h2{
+  margin:0;
+  font-size:clamp(26px,3vw,34px);
+  letter-spacing:-.03em;
+  color:#fff!important;
 }
-main.container .section h3, main.container .section p, main.container .section td, main.container .section strong {
-  color:#f8fafc !important;
+
+.page-title p{
+  margin:7px 0 0;
+  color:var(--muted)!important;
+  font-size:13px;
 }
-main.container .section .section-header p, main.container .section .reason, main.container .section .note {
-  color:#b8c9dc !important;
+
+.quick-actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:12px;
 }
-main.container .section table {
-  background:transparent !important;
+
+.quick-action{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:72px;
+  padding:14px 16px;
+  text-decoration:none!important;
+  color:#fff!important;
+  background:linear-gradient(145deg,rgba(11,48,76,.98),rgba(7,28,50,.98));
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 10px 26px rgba(0,0,0,.22);
+  transition:transform .16s ease,border-color .16s ease,background .16s ease;
 }
-</style></head>
+
+.quick-action:hover{
+  transform:translateY(-2px);
+  border-color:var(--border-strong);
+  background:linear-gradient(145deg,rgba(14,57,88,.98),rgba(8,33,57,.98));
+}
+
+.quick-icon{
+  display:grid;
+  place-items:center;
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  border-radius:12px;
+  background:rgba(34,211,238,.12);
+  border:1px solid rgba(103,232,249,.14);
+  font-size:20px;
+}
+
+.quick-action strong{
+  display:block;
+  font-size:14px;
+  line-height:1.2;
+}
+
+.quick-action span{
+  display:block;
+  margin-top:4px;
+  color:#9fb1c8;
+  font-size:11px;
+}
+
+.tools{
+  margin-bottom:24px;
+}
+
+.tools summary{
+  cursor:pointer;
+  list-style:none;
+  padding:12px 14px;
+  border:1px solid rgba(103,232,249,.12);
+  border-radius:12px;
+  background:rgba(7,20,38,.72);
+  color:#dcecff;
+  font-size:13px;
+  font-weight:800;
+}
+
+.tools summary::-webkit-details-marker{display:none}
+
+.tools[open] summary{
+  border-color:rgba(103,232,249,.22);
+  border-bottom-left-radius:8px;
+  border-bottom-right-radius:8px;
+}
+
+.tool-list{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:9px;
+  padding:10px 0 0;
+}
+
+.tool-link{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  background:rgba(8,22,40,.78);
+  border:1px solid rgba(148,163,184,.10);
+  border-radius:10px;
+  color:#dbeafe!important;
+  text-decoration:none!important;
+  font-size:12px;
+  font-weight:700;
+  transition:.16s ease;
+}
+
+.tool-link:hover{
+  border-color:rgba(103,232,249,.24);
+  background:rgba(11,31,54,.96);
+  transform:translateY(-1px);
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:24px;
+}
+
+.stat-card{
+  position:relative;
+  overflow:hidden;
+  min-height:105px;
+  padding:17px;
+  background:linear-gradient(180deg,#102743,#0a1a30)!important;
+  border:1px solid rgba(148,163,184,.12);
+  border-radius:15px!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.24)!important;
+}
+
+.stat-card::after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0 0;
+  height:3px;
+  background:var(--cyan);
+}
+
+.stat-card.pending::after{background:var(--amber)}
+.stat-card.assigned::after{background:var(--green)}
+.stat-card.rejected::after{background:var(--red)}
+.stat-card.admin::after{background:var(--violet)}
+
+.stat-label{
+  color:#a9bad0!important;
+  font-size:11px!important;
+  font-weight:750;
+}
+
+.stat-value{
+  margin-top:8px;
+  color:#fff!important;
+  font-size:29px!important;
+  line-height:1;
+  font-weight:900!important;
+  letter-spacing:-.03em;
+}
+
+.section{
+  margin-bottom:20px;
+  padding:20px!important;
+  background:linear-gradient(180deg,#091a31,#071426)!important;
+  border:1px solid rgba(34,211,238,.20)!important;
+  border-radius:16px!important;
+  box-shadow:0 16px 38px rgba(0,0,0,.28)!important;
+  color:#f8fafc!important;
+}
+
+.section-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:15px!important;
+}
+
+.section-header h3{
+  margin:0;
+  color:#fff!important;
+  font-size:18px!important;
+  font-weight:850;
+}
+
+.section-header p{
+  margin:5px 0 0;
+  color:#9fb1c8!important;
+  font-size:12px;
+}
+
+.table-wrapper{
+  overflow-x:auto;
+  border-radius:11px;
+}
+
+table{
+  width:100%;
+  min-width:860px;
+  border-collapse:separate!important;
+  border-spacing:0 5px!important;
+}
+
+th,td{
+  padding:11px 10px!important;
+  text-align:left;
+  vertical-align:middle!important;
+  font-size:12px;
+}
+
+th{
+  background:#12365b!important;
+  color:#eefaff!important;
+  font-weight:850!important;
+  border-top:1px solid rgba(103,232,249,.18);
+  border-bottom:1px solid rgba(103,232,249,.12);
+}
+
+tbody tr td{
+  background:#102846!important;
+  color:#e9f2fb!important;
+  border-top:1px solid rgba(103,232,249,.06);
+  border-bottom:1px solid rgba(103,232,249,.06);
+}
+
+tbody tr:nth-child(even) td{
+  background:#0d233d!important;
+}
+
+tbody tr:hover td{
+  background:#133452!important;
+}
+
+tbody tr td:first-child{
+  border-left:1px solid rgba(148,163,184,.07);
+  border-radius:8px 0 0 8px;
+}
+
+tbody tr td:last-child{
+  border-right:1px solid rgba(148,163,184,.07);
+  border-radius:0 8px 8px 0;
+}
+
+.score{
+  color:var(--cyan-soft)!important;
+  font-weight:900;
+}
+
+.badge{
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  min-height:23px;
+  padding:4px 9px!important;
+  border-radius:999px!important;
+  font-size:10px!important;
+  font-weight:900!important;
+}
+
+.badge.pending{
+  background:rgba(245,158,11,.14)!important;
+  color:#fcd34d!important;
+  border:1px solid rgba(245,158,11,.30);
+}
+
+.badge.assigned{
+  background:rgba(34,197,94,.14)!important;
+  color:#86efac!important;
+  border:1px solid rgba(34,197,94,.28);
+}
+
+.reason{
+  max-width:320px;
+  color:#b9c9da!important;
+  line-height:1.45;
+}
+
+.button-row{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  border-radius:8px!important;
+  min-height:31px;
+  padding:0 10px;
+  color:#fff!important;
+  cursor:pointer;
+  font-size:11px;
+  font-weight:800;
+  text-decoration:none!important;
+  transition:.16s ease;
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.06);
+}
+
+.btn-approve{background:#16a34a!important}
+.btn-reject{background:#dc2626!important}
+.btn-manual{background:#6d4be8!important}
+
+.empty{
+  padding:28px!important;
+  text-align:center!important;
+  background:rgba(7,22,40,.80)!important;
+  border:1px dashed rgba(103,232,249,.22)!important;
+  border-radius:10px!important;
+  color:#afc0d4!important;
+}
+
+.note{
+  margin-top:9px;
+  color:#91a5bd!important;
+  font-size:11px;
+}
+
+.attention{
+  border-color:rgba(245,158,11,.22)!important;
+}
+
+.assigned-section{
+  border-color:rgba(34,197,94,.18)!important;
+}
+
+/* Reduce the motion added by the global script on large dashboard sections */
+.section:hover,
+.stat-card:hover{
+  transform:none!important;
+}
+
+@media(max-width:900px){
+  .quick-actions{grid-template-columns:1fr}
+  .tool-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .page-head{align-items:flex-start}
+}
+
+@media(max-width:600px){
+  .topbar{
+    position:relative;
+    padding:14px 16px;
+  }
+
+  .container{
+    width:94%;
+    margin-top:20px;
+  }
+
+  .page-head{
+    flex-direction:column;
+    margin-bottom:16px;
+  }
+
+  .tool-list,
+  .stats{
+    grid-template-columns:1fr;
+  }
+
+  .section{
+    padding:16px!important;
+  }
+
+  .section-header{
+    flex-direction:column;
+  }
+
+  table{
+    min-width:780px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
+}
+</style>
+</head>
+
 <body>
-<header class="topbar"><div class="brand"><h1>Smart Faculty Substitute System</h1><p>Main Campus · BCA · HOD / Admin Portal</p></div><a href="{{ url_for('logout') }}" class="logout">Logout</a></header>
+<header class="topbar">
+  <div class="brand">
+    <h1>Smart Faculty Substitute System</h1>
+    <p>Main Campus · BCA · HOD / Admin Portal</p>
+  </div>
+  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+</header>
+
 <main class="container">
-<div class="page-title"><h2>Admin Dashboard</h2><p>Manage faculty absences, smart recommendations and approvals.</p>
-<div class="actions">
-<a href="{{ url_for('admin_absence') }}" class="action-link">👤 Teacher Absence</a>
-<a href="{{ url_for('admin_unavailability') }}" class="action-link secondary">🕒 Unavailability Requests</a>
-<a href="{{ url_for('admin_today') }}" class="action-link" style="background:#ea580c">📅 Today's Operations</a>
-<a href="{{ url_for('teacher_dashboard') }}" class="action-link" style="background:#16a34a">👩‍🏫 Teacher Dashboard</a>
-<a href="{{ url_for('what_if_simulation') }}" class="action-link" style="background:#7c3aed">🔬 What-If Simulation</a>
-<a href="{{ url_for('admin_history') }}" class="action-link" style="background:#475569">📋 History</a>
-<a href="{{ url_for('admin_reports') }}" class="action-link" style="background:#0f766e">📊 Reports</a>
-<a href="{{ url_for('timetable_validation') }}" class="action-link" style="background:#0891b2">✅ Timetable Validation</a>
-<a href="{{ url_for('admin_faculty_timetables') }}" class="action-link" style="background:#1d4ed8">👩‍🏫 Faculty Timetables</a>
-</div></div>
-<section class="stats"><div class="stat-card pending"><div class="stat-label">Pending Recommendations</div><div class="stat-value">{{ pending|length }}</div></div><div class="stat-card assigned"><div class="stat-label">Assigned Substitutions</div><div class="stat-value">{{ assigned_count }}</div></div><div class="stat-card rejected"><div class="stat-label">Rejected Recommendations</div><div class="stat-value">{{ rejected_count }}</div></div><div class="stat-card admin"><div class="stat-label">Admin Action Required</div><div class="stat-value">{{ admin_actions|length }}</div></div></section>
 
-<section class="section"><div class="section-header"><div><h3>Pending Recommendations</h3><p>Review and finalize smart substitute recommendations.</p></div></div>{% if pending %}<div class="table-wrapper"><table><thead><tr><th>Date</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent Teacher</th><th>Recommended Teacher</th><th>Score</th><th>Status</th><th>Action</th></tr></thead><tbody>{% for item in pending %}<tr><td>{{ item.assignment_date }}</td><td>P{{ item.period_no }}</td><td>{{ item.class_name }}</td><td>{{ item.subject_name }}</td><td>{{ item.absent_teacher }}</td><td><strong>{{ item.substitute_teacher }}</strong></td><td class="score">{{ "%.2f"|format(item.score or 0) }}</td><td><span class="badge pending">{{ item.status }}</span></td><td><div class="button-row"><form method="POST" action="{{ url_for('approve_assignment', assignment_id=item.assignment_id) }}"><button class="btn btn-approve" type="submit">Approve</button></form><form method="POST" action="{{ url_for('reject_assignment', assignment_id=item.assignment_id) }}"><button class="btn btn-reject" type="submit">Reject</button></form></div></td></tr>{% endfor %}</tbody></table></div><div class="note">Recommendations are generated by the smart allocation engine and require HOD approval before becoming assigned.</div>{% else %}<div class="empty">✅ No pending recommendations.</div>{% endif %}</section>
-<section class="section"><div class="section-header"><div><h3>✅ Assigned Substitutions</h3><p>Finalized duties. Reallocate a duty if the assigned substitute later becomes unavailable.</p></div></div>{% if assigned %}<div class="table-wrapper"><table><thead><tr><th>Date</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent Teacher</th><th>Substitute Teacher</th><th>Status</th><th>Reason</th><th>Action</th></tr></thead><tbody>{% for item in assigned %}<tr><td>{{ item.assignment_date }}</td><td>P{{ item.period_no }}</td><td>{{ item.class_name }}</td><td>{{ item.subject_name }}</td><td>{{ item.absent_teacher }}</td><td><strong>{{ item.substitute_teacher }}</strong></td><td><span class="badge assigned">{{ item.status }}</span></td><td class="reason">{{ item.reason }}</td><td><a href="{{ url_for('reallocate_assignment', assignment_id=item.assignment_id) }}" class="btn btn-manual">🔄 Reallocate</a></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty">No assigned substitutions yet.</div>{% endif %}</section>
-<section class="section"><div class="section-header"><div><h3>⚠️ Admin Action Required</h3><p>Periods where automatic allocation could not find a substitute.</p></div></div>{% if admin_actions %}<div class="table-wrapper"><table><thead><tr><th>Date</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent Teacher</th><th>Reason</th><th>Action</th></tr></thead><tbody>{% for item in admin_actions %}<tr><td>{{ item.assignment_date }}</td><td>P{{ item.period_no }}</td><td>{{ item.class_name }}</td><td>{{ item.subject_name }}</td><td>{{ item.absent_teacher }}</td><td class="reason">{{ item.reason }}</td><td><a href="{{ url_for('manual_assignment', assignment_id=item.assignment_id) }}" class="btn btn-manual">Manual Assign</a></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty">✅ No admin action is currently required.</div>{% endif %}</section>
+  <div class="page-head">
+    <div class="page-title">
+      <h2>Admin Dashboard</h2>
+      <p>Manage absences, substitutions and daily faculty operations.</p>
+    </div>
+  </div>
+
+  <!-- Most-used actions -->
+  <section class="quick-actions" aria-label="Quick actions">
+
+    <a href="{{ url_for('admin_absence') }}" class="quick-action">
+      <div class="quick-icon">👤</div>
+      <div>
+        <strong>Teacher Absence</strong>
+        <span>Mark a teacher absent</span>
+      </div>
+    </a>
+
+    <a href="{{ url_for('admin_today') }}" class="quick-action">
+      <div class="quick-icon">📅</div>
+      <div>
+        <strong>Today's Operations</strong>
+        <span>See today's substitutions</span>
+      </div>
+    </a>
+
+    <a href="{{ url_for('admin_unavailability') }}" class="quick-action">
+      <div class="quick-icon">🕒</div>
+      <div>
+        <strong>Unavailability</strong>
+        <span>Review faculty requests</span>
+      </div>
+    </a>
+
+  </section>
+
+  <!-- Less frequent tools -->
+  <details class="tools">
+    <summary>More Admin Tools ▾</summary>
+    <div class="tool-list">
+
+      <a href="{{ url_for('teacher_dashboard') }}" class="tool-link">👩‍🏫 Teacher Dashboard</a>
+      <a href="{{ url_for('admin_faculty_timetables') }}" class="tool-link">📚 Faculty Timetables</a>
+      <a href="{{ url_for('timetable_validation') }}" class="tool-link">✅ Timetable Validation</a>
+      <a href="{{ url_for('admin_history') }}" class="tool-link">📋 History</a>
+      <a href="{{ url_for('admin_reports') }}" class="tool-link">📊 Reports</a>
+      <a href="{{ url_for('what_if_simulation') }}" class="tool-link">🔬 What-If Simulation</a>
+
+    </div>
+  </details>
+
+  <!-- Summary -->
+  <section class="stats" aria-label="Dashboard summary">
+
+    <div class="stat-card pending">
+      <div class="stat-label">Pending Recommendations</div>
+      <div class="stat-value">{{ pending|length }}</div>
+    </div>
+
+    <div class="stat-card assigned">
+      <div class="stat-label">Assigned Substitutions</div>
+      <div class="stat-value">{{ assigned_count }}</div>
+    </div>
+
+    <div class="stat-card rejected">
+      <div class="stat-label">Rejected Recommendations</div>
+      <div class="stat-value">{{ rejected_count }}</div>
+    </div>
+
+    <div class="stat-card admin">
+      <div class="stat-label">Admin Action Required</div>
+      <div class="stat-value">{{ admin_actions|length }}</div>
+    </div>
+
+  </section>
+
+  <!-- Pending -->
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h3>Pending Recommendations</h3>
+        <p>Check the suggested substitute before approving it.</p>
+      </div>
+    </div>
+
+    {% if pending %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Period</th>
+            <th>Class</th>
+            <th>Subject</th>
+            <th>Absent Teacher</th>
+            <th>Recommended Teacher</th>
+            <th>Score</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for item in pending %}
+          <tr>
+            <td>{{ item.assignment_date }}</td>
+            <td>P{{ item.period_no }}</td>
+            <td>{{ item.class_name }}</td>
+            <td>{{ item.subject_name }}</td>
+            <td>{{ item.absent_teacher }}</td>
+            <td><strong>{{ item.substitute_teacher }}</strong></td>
+            <td class="score">{{ "%.2f"|format(item.score or 0) }}</td>
+            <td><span class="badge pending">{{ item.status }}</span></td>
+            <td>
+              <div class="button-row">
+                <form method="POST" action="{{ url_for('approve_assignment', assignment_id=item.assignment_id) }}">
+                  <button class="btn btn-approve" type="submit">Approve</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('reject_assignment', assignment_id=item.assignment_id) }}">
+                  <button class="btn btn-reject" type="submit">Reject</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      Recommendations are generated automatically and need HOD approval before they become assigned.
+    </div>
+    {% else %}
+      <div class="empty">✅ No pending recommendations right now.</div>
+    {% endif %}
+  </section>
+
+  <!-- Admin action -->
+  <section class="section attention">
+    <div class="section-header">
+      <div>
+        <h3>⚠️ Needs Your Attention</h3>
+        <p>Periods where automatic allocation could not find a substitute.</p>
+      </div>
+    </div>
+
+    {% if admin_actions %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Period</th>
+            <th>Class</th>
+            <th>Subject</th>
+            <th>Absent Teacher</th>
+            <th>Reason</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for item in admin_actions %}
+          <tr>
+            <td>{{ item.assignment_date }}</td>
+            <td>P{{ item.period_no }}</td>
+            <td>{{ item.class_name }}</td>
+            <td>{{ item.subject_name }}</td>
+            <td>{{ item.absent_teacher }}</td>
+            <td class="reason">{{ item.reason }}</td>
+            <td>
+              <a href="{{ url_for('manual_assignment', assignment_id=item.assignment_id) }}" class="btn btn-manual">
+                Manual Assign
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="empty">✅ No manual action is currently required.</div>
+    {% endif %}
+  </section>
+
+  <!-- Assigned -->
+  <section class="section assigned-section">
+    <div class="section-header">
+      <div>
+        <h3>✅ Assigned Substitutions</h3>
+        <p>Finalized duties. Reallocate one when the assigned teacher becomes unavailable.</p>
+      </div>
+    </div>
+
+    {% if assigned %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Period</th>
+            <th>Class</th>
+            <th>Subject</th>
+            <th>Absent Teacher</th>
+            <th>Substitute Teacher</th>
+            <th>Status</th>
+            <th>Reason</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for item in assigned %}
+          <tr>
+            <td>{{ item.assignment_date }}</td>
+            <td>P{{ item.period_no }}</td>
+            <td>{{ item.class_name }}</td>
+            <td>{{ item.subject_name }}</td>
+            <td>{{ item.absent_teacher }}</td>
+            <td><strong>{{ item.substitute_teacher }}</strong></td>
+            <td><span class="badge assigned">{{ item.status }}</span></td>
+            <td class="reason">{{ item.reason }}</td>
+            <td>
+              <a href="{{ url_for('reallocate_assignment', assignment_id=item.assignment_id) }}" class="btn btn-manual">
+                🔄 Reallocate
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="empty">No assigned substitutions yet.</div>
+    {% endif %}
+  </section>
+
 </main>
-<script>
-(function(){
-  const input = document.getElementById('facultySearch');
-  const list = document.getElementById('facultyList');
-  const count = document.getElementById('facultyVisibleCount');
-  if (!input || !list || !count) return;
 
-  input.addEventListener('input', function(){
-    const term = this.value.trim().toLowerCase();
-    let visible = 0;
-    list.querySelectorAll('.faculty-card').forEach(function(card){
-      const match = !term || (card.dataset.search || '').includes(term);
-      card.style.display = match ? '' : 'none';
-      if (match) visible += 1;
-    });
-    count.textContent = visible;
-  });
-})();
-</script>
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-</body></html>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

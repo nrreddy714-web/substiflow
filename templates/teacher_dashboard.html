@@ -38,415 +38,403 @@
         .operations-button {
             background: #ea580c;
         }
+    </style>
 
-        /* =========================================================
-           SUBSTIFLOW TEACHER DASHBOARD THEME
-           Soft pale-green -> aqua -> blue gradient inspired by the
-           supplied reference image.
-           ========================================================= */
-        html, body { min-height: 100%; }
-
-        body {
-            background:
-                radial-gradient(circle at 7% 7%, rgba(236,255,194,.96) 0 10%, transparent 32%),
-                radial-gradient(circle at 78% 18%, rgba(81,224,218,.50) 0 12%, transparent 36%),
-                linear-gradient(135deg, #d9ffad 0%, #7ce9d1 42%, #28bce9 72%, #087be0 100%);
-            color: #082347;
-        }
-
-        .topbar {
-            background: rgba(4,18,48,.88);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(255,255,255,.18);
-        }
-
-        .card,
-        .info-card {
-            background: rgba(255,255,255,.91);
-            border: 1px solid rgba(255,255,255,.72);
-            box-shadow: 0 18px 45px rgba(4,40,88,.14), inset 0 1px 0 rgba(255,255,255,.78);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-
-        .card h2,
-        .card h3,
-        .info-card strong { color: #062554; }
-
-        .section-description,
-        .card p,
-        .info-card span { color: #29486f; }
-
-        th {
-            background: rgba(8,57,105,.96) !important;
-            color: #fff !important;
-        }
-
-        td {
-            background: rgba(255,255,255,.75);
-            color: #12355d;
-        }
-
-        tbody tr:hover td { background: rgba(236,255,230,.90); }
-
-        .empty-state {
-            background: rgba(245,255,252,.86) !important;
-            color: #17416b !important;
-            border: 1px solid rgba(16,103,152,.12);
-        }
-
-        .action-button {
-            box-shadow: 0 10px 24px rgba(4,45,95,.16);
-            transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
-        }
-
-        .operations-button { background: linear-gradient(135deg,#0b6fe8,#0b9eea); }
-        .timetable-button { background: linear-gradient(135deg,#007f91,#10b7a4); }
-        .action-button:not(.operations-button):not(.timetable-button) {
-            background: linear-gradient(135deg,#173f89,#2769c7);
-        }
-
-        .action-button:hover {
-            transform: translateY(-2px);
-            opacity: 1;
-            box-shadow: 0 14px 28px rgba(4,45,95,.22);
-        }
-
-        .logout { box-shadow: 0 8px 20px rgba(0,0,0,.18); }
-
-        .badge.success {
-            background: rgba(17,183,132,.16) !important;
-            color: #087451 !important;
-            border: 1px solid rgba(17,183,132,.28);
-        }
-
-        .badge.danger {
-            background: rgba(220,38,38,.11) !important;
-            color: #a51e1e !important;
-            border: 1px solid rgba(220,38,38,.20);
-        }
-
-        .hero-card { position: relative; overflow: hidden; }
-
-        .hero-card::after {
-            content: "";
-            position: absolute;
-            width: 260px;
-            height: 260px;
-            right: -110px;
-            top: -120px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(34,211,238,.28), transparent 68%);
-            pointer-events: none;
-        }
-
-        /* Premium dark glass cards - keeps the supplied gradient visible */
-        .card,
-        .info-card {
-            position: relative;
-            background: linear-gradient(145deg, rgba(8,28,52,.92), rgba(10,47,64,.84)) !important;
-            color: #f3f8ff !important;
-            border: 1px solid rgba(141,239,224,.20) !important;
-            box-shadow: 0 18px 42px rgba(3,25,52,.22), inset 0 1px 0 rgba(255,255,255,.08) !important;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            overflow: hidden;
-        }
-
-        .card::before,
-        .info-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(120deg, rgba(255,255,255,.08), transparent 38%, rgba(17,224,201,.05));
-            pointer-events: none;
-        }
-
-        .card h2,
-        .card h3,
-        .info-card strong {
-            position: relative;
-            color: #ffffff !important;
-            text-shadow: 0 1px 10px rgba(0,0,0,.20);
-        }
-
-        .card p,
-        .section-description,
-        .info-card span {
-            position: relative;
-            color: #c8d9ea !important;
-        }
-
-        .profile-grid .info-card {
-            border-left: 3px solid rgba(74,236,202,.72) !important;
-            transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
-        }
-
-        .profile-grid .info-card:hover {
-            transform: translateY(-3px);
-            border-left-color: #9dfb66 !important;
-            box-shadow: 0 20px 40px rgba(4,37,64,.30), inset 0 1px 0 rgba(255,255,255,.10) !important;
-        }
-
-        .table-wrapper {
-            position: relative;
-            border-radius: 14px;
-            overflow-x: auto;
-            background: rgba(3,17,35,.38);
-            border: 1px solid rgba(160,239,228,.12);
-        }
-
-        table {
-            border-collapse: separate !important;
-            border-spacing: 0;
-        }
-
-        th {
-            background: linear-gradient(135deg, #0a5363, #0d6f78) !important;
-            color: #ffffff !important;
-            border-bottom: 1px solid rgba(255,255,255,.14);
-        }
-
-        td {
-            background: rgba(6,29,49,.80) !important;
-            color: #e8f4ff !important;
-            border-bottom: 1px solid rgba(166,220,228,.10) !important;
-        }
-
-        tbody tr:hover td {
-            background: rgba(16,70,79,.86) !important;
-        }
-
-        .badge.success {
-            background: rgba(66,220,175,.16) !important;
-            color: #a7ffe7 !important;
-            border: 1px solid rgba(66,220,175,.32);
-        }
-
-        .badge.danger {
-            background: rgba(248,113,113,.14) !important;
-            color: #ffd0d0 !important;
-            border: 1px solid rgba(248,113,113,.24);
-        }
-
-        .empty-state {
-            background: linear-gradient(135deg, rgba(11,53,68,.88), rgba(10,43,59,.78)) !important;
-            color: #d9edf3 !important;
-            border: 1px solid rgba(129,231,218,.18) !important;
-        }
-
-        .hero-card,
-        .card {
-            box-shadow: 0 18px 48px rgba(2,26,54,.24), 0 0 0 1px rgba(255,255,255,.03);
-        }
-
-        .topbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .profile-top-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: 10px 14px;
-            border-radius: 10px;
-            text-decoration: none;
-            color: #ffffff;
-            background: rgba(14, 116, 144, .72);
-            border: 1px solid rgba(255,255,255,.14);
-            font-weight: 700;
-            box-shadow: 0 8px 20px rgba(2,26,54,.16);
-            transition: transform .2s ease, background .2s ease;
-        }
-
-        .profile-top-button:hover {
-            transform: translateY(-2px);
-            background: rgba(17, 148, 163, .88);
-        }
-
-        .profile-section {
-            margin: 14px 0 18px;
-        }
-
-        .profile-details {
-            border-radius: 16px;
-            overflow: hidden;
-            background: linear-gradient(145deg, rgba(8,28,52,.78), rgba(10,47,64,.68));
-            border: 1px solid rgba(141,239,224,.20);
-            box-shadow: 0 14px 34px rgba(3,25,52,.16);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-        }
-
-        .profile-details summary {
-            list-style: none;
-            cursor: pointer;
-            padding: 16px 18px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            color: #ffffff;
-            font-weight: 800;
-            user-select: none;
-        }
-
-        .profile-details summary::-webkit-details-marker {
-            display: none;
-        }
-
-        .profile-summary-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .profile-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 11px;
-            display: grid;
-            place-items: center;
-            background: linear-gradient(135deg, rgba(90,240,206,.24), rgba(39,171,233,.24));
-            border: 1px solid rgba(128,239,224,.24);
-        }
-
-        .profile-summary-right {
-            color: #bfe6ea;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .profile-chevron {
-            display: inline-block;
-            margin-left: 6px;
-            font-size: 18px;
-            transition: transform .2s ease;
-        }
-
-        .profile-details[open] .profile-chevron {
-            transform: rotate(180deg);
-        }
-
-        .profile-details .profile-grid {
-            padding: 0 14px 14px;
-            gap: 12px;
-        }
-
-        .profile-grid {
-            gap: 14px;
-        }
-
-        .action-button {
-            border: 1px solid rgba(255,255,255,.10);
-        }
-
-        .logout {
-            border: 1px solid rgba(255,255,255,.10);
-        }
-
-        @media (max-width: 700px) {
-            .card, .info-card {
-                border-radius: 16px;
-            }
-
-            .topbar-actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
-
-            .profile-top-button,
-            .logout {
-                min-height: 40px;
-            }
-
-            .profile-details summary {
-                align-items: flex-start;
-            }
-
-            .profile-summary-right {
-                white-space: nowrap;
-            }
-        }
-
-    
-/* ================= TEACHER PORTAL THEME ================= */
+<style id="sf-v2-theme">
+*{box-sizing:border-box}
 :root{
-  --teacher-bg-a:#efffc8;
-  --teacher-bg-b:#66ead6;
-  --teacher-bg-c:#169be8;
-  --teacher-glass:rgba(8,24,48,.86);
-  --teacher-glass-2:rgba(12,42,61,.82);
-  --teacher-line:rgba(103,239,220,.38);
-  --teacher-text:#f8fbff;
-  --teacher-muted:#c8d9ec;
-  --teacher-cyan:#44f1d0;
+  --sf-bg:#020617;
+  --sf-panel:#08172b;
+  --sf-panel-2:#0b203a;
+  --sf-panel-3:#0e2948;
+  --sf-line:rgba(103,232,249,.17);
+  --sf-line-strong:rgba(103,232,249,.30);
+  --sf-cyan:#22d3ee;
+  --sf-blue:#3b82f6;
+  --sf-violet:#8b5cf6;
+  --sf-green:#34d399;
+  --sf-amber:#fbbf24;
+  --sf-red:#fb7185;
+  --sf-text:#f7fbff;
+  --sf-muted:#9fb1cb;
 }
-html,body{min-height:100%;}
+html{scroll-behavior:smooth}
 body{
+  margin:0!important;
+  min-height:100vh!important;
+  color:var(--sf-text)!important;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif!important;
   background:
-    radial-gradient(circle at 12% 8%, rgba(235,255,182,.92), transparent 24%),
-    radial-gradient(circle at 88% 18%, rgba(69,235,220,.30), transparent 30%),
-    linear-gradient(135deg,var(--teacher-bg-a) 0%,var(--teacher-bg-b) 46%,var(--teacher-bg-c) 100%) !important;
-  background-attachment:scroll !important;
-  color:var(--teacher-text) !important;
+    radial-gradient(circle at 8% 4%,rgba(34,211,238,.14),transparent 26%),
+    radial-gradient(circle at 94% 7%,rgba(59,130,246,.15),transparent 28%),
+    linear-gradient(145deg,#020617 0%,#061429 56%,#030814 100%)!important;
 }
+body.teacher-page{
+  background:
+    radial-gradient(circle at 8% 4%,rgba(239,255,194,.82),transparent 23%),
+    radial-gradient(circle at 90% 9%,rgba(60,229,214,.25),transparent 30%),
+    linear-gradient(135deg,#dfffb4 0%,#77e3d0 45%,#25b8e5 74%,#0879df 100%)!important;
+}
+a{text-decoration:none}
+button,input,select,textarea{font:inherit}
 .topbar{
-  background:linear-gradient(135deg,rgba(4,18,35,.98),rgba(8,37,58,.98)) !important;
-  border-bottom:1px solid rgba(68,241,208,.25);
-  box-shadow:0 8px 24px rgba(2,18,32,.22);
+  position:sticky!important;top:0!important;z-index:80!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;
+  padding:14px clamp(16px,3vw,32px)!important;
+  background:rgba(2,7,20,.91)!important;
+  border-bottom:1px solid rgba(103,232,249,.14)!important;
+  backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
+  box-shadow:0 10px 34px rgba(0,0,0,.22)!important;
 }
-.container{position:relative;z-index:1;}
-.card,.hero-card,.info-card,.profile-card,.table-card,.section-card,.panel{
-  background:linear-gradient(145deg,var(--teacher-glass),var(--teacher-glass-2)) !important;
-  color:var(--teacher-text) !important;
-  border:1px solid var(--teacher-line) !important;
-  box-shadow:0 12px 28px rgba(2,22,38,.20) !important;
+.topbar h1,.brand h1{color:#fff!important;margin:0!important}
+.topbar p,.brand p{color:#9fb1cb!important;margin:4px 0 0!important}
+.logout{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  min-height:38px!important;padding:0 13px!important;border-radius:10px!important;
+  background:rgba(251,113,133,.07)!important;color:#fecdd3!important;
+  border:1px solid rgba(251,113,133,.22)!important;font-weight:900!important;
 }
-h1,h2,h3,h4,h5,h6,strong,b{color:#fff !important;}
-p,.subtitle,.sub,.muted,.label,.reason,.note,.description{color:var(--teacher-muted) !important;}
-label{color:#e6f7ff !important;font-weight:700;}
+.sf-feature-nav{
+  position:relative;z-index:70;
+  border-bottom:1px solid rgba(103,232,249,.10);
+  background:rgba(4,12,27,.82);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 8px 22px rgba(0,0,0,.16)
+}
+.sf-feature-scroll{
+  width:min(1280px,94%);margin:0 auto;
+  display:flex;gap:7px;overflow-x:auto;
+  padding:9px 0;
+  scrollbar-width:thin
+}
+.sf-feature-scroll a{
+  flex:0 0 auto;
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:34px;padding:0 11px;border-radius:9px;
+  color:#dcecff!important;background:rgba(255,255,255,.028);
+  border:1px solid rgba(148,163,184,.10);
+  font-size:10px;font-weight:850;white-space:nowrap;
+  transition:.17s ease
+}
+.sf-feature-scroll a:hover{
+  color:#fff!important;background:rgba(34,211,238,.08);
+  border-color:var(--sf-line-strong);transform:translateY(-1px)
+}
+.container{
+  width:min(1240px,94%)!important;
+  margin:0 auto!important;padding:24px 0 46px!important
+}
+.back{
+  display:inline-flex!important;align-items:center!important;gap:7px!important;
+  color:#8ceefe!important;font-size:12px!important;font-weight:900!important;
+  margin-bottom:16px!important
+}
+.hero,.hero-card,.section,.card,.content-card,.side-card,.info-card,.profile-details,.panel,.stat-card{
+  background:linear-gradient(145deg,rgba(8,22,43,.93),rgba(5,14,30,.83))!important;
+  color:#f7fbff!important;
+  border:1px solid rgba(103,232,249,.15)!important;
+  box-shadow:0 18px 44px rgba(0,0,0,.20)!important;
+  border-radius:17px!important
+}
+.hero,.hero-card{padding:22px!important}
+.section,.card,.content-card,.side-card,.panel{padding:18px!important}
+h1,h2,h3,h4,h5,h6,strong,b{color:#fff!important}
+p,.subtitle,.sub,.page-sub,.muted,.note,.reason,.description{color:#9fb1cb!important}
+label{color:#c4d4e8!important;font-weight:850!important}
 input,select,textarea{
-  background:rgba(3,18,34,.72) !important;
-  color:#fff !important;
-  border:1px solid rgba(122,233,222,.35) !important;
+  background:#07152a!important;color:#effaff!important;
+  border:1px solid rgba(148,163,184,.16)!important;
+  border-radius:10px!important;outline:none!important
 }
-input::placeholder,textarea::placeholder{color:#91a9bf !important;}
-.back{color:#0b263c !important;background:rgba(255,255,255,.78) !important;border:1px solid rgba(5,44,70,.15);}
-.back:hover{background:#fff !important;color:#06213b !important;}
-.action-button,.btn{box-shadow:0 7px 16px rgba(0,0,0,.18);}
-.btn,.action-button{color:#fff !important;}
-table{color:#eef8ff !important;}
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(103,232,249,.48)!important;
+  box-shadow:0 0 0 4px rgba(34,211,238,.07)!important
+}
+.btn,.action-link,.action-button{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  border-radius:10px!important;font-weight:900!important
+}
+.btn{
+  min-height:37px!important;padding:0 12px!important;
+  border:0!important;background:linear-gradient(135deg,#22d3ee,#3b82f6)!important;color:#03131c!important;
+  box-shadow:0 9px 22px rgba(34,211,238,.12)!important
+}
+.btn:hover,.action-link:hover,.action-button:hover{transform:translateY(-1px)!important}
+.btn-approve,.green{background:linear-gradient(135deg,#34d399,#10b981)!important;color:#03140f!important}
+.btn-reject,.red{background:linear-gradient(135deg,#fb7185,#ef4444)!important;color:#220307!important}
+.btn-manual,.violet{background:linear-gradient(135deg,#a78bfa,#7c3aed)!important;color:#fff!important}
+.btn.secondary,.secondary{
+  background:rgba(255,255,255,.045)!important;color:#dcecff!important;
+  border:1px solid rgba(148,163,184,.14)!important;box-shadow:none!important
+}
+.table-wrapper,.table-wrap,.faculty-grid-wrap,.wrap{
+  overflow-x:auto!important;border-radius:12px!important;
+  border:1px solid rgba(148,163,184,.10)!important;
+  background:rgba(2,8,20,.22)!important
+}
+table{width:100%!important;border-collapse:separate!important;border-spacing:0!important}
 th{
-  background:linear-gradient(135deg,#0b2a46,#124c60) !important;
-  color:#f8fbff !important;
-  border-bottom:1px solid rgba(119,236,223,.35) !important;
+  background:#0d3150!important;color:#eafcff!important;
+  font-size:9px!important;font-weight:900!important;text-transform:uppercase!important;
+  letter-spacing:.07em!important;border-bottom:1px solid rgba(103,232,249,.14)!important
 }
 td{
-  background:rgba(7,28,48,.72) !important;
-  color:#edf7ff !important;
-  border-color:rgba(119,236,223,.15) !important;
+  background:rgba(8,27,47,.78)!important;color:#e6f2ff!important;
+  border-bottom:1px solid rgba(148,163,184,.07)!important
 }
-tr:hover td,tr:active td{background:rgba(17,67,83,.88) !important;color:#fff !important;}
-.badge.success,.assigned{background:rgba(26,195,141,.22) !important;color:#7ff8cf !important;border:1px solid rgba(127,248,207,.35);}
-.badge.pending{background:rgba(245,183,46,.20) !important;color:#ffd66d !important;border:1px solid rgba(255,214,109,.35);}
-.badge.danger{background:rgba(255,79,103,.18) !important;color:#ff9ba9 !important;border:1px solid rgba(255,155,169,.35);}
-.empty{background:rgba(3,20,37,.50) !important;color:#c9d9e7 !important;border:1px dashed rgba(120,235,221,.25);}
-.stat,.info-card,.profile-card{color:#fff !important;}
-@media(max-width:700px){
-  .container{width:94% !important;}
-  .card,.hero-card,.info-card,.profile-card,.table-card{border-radius:16px !important;}
+tbody tr:nth-child(even) td{background:rgba(10,30,51,.84)!important}
+tbody tr:hover td{background:rgba(18,67,84,.90)!important}
+.badge{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  min-height:22px!important;padding:4px 8px!important;border-radius:999px!important;
+  font-size:9px!important;font-weight:950!important;border:1px solid transparent!important
 }
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto !important;transition:none !important;animation:none !important;}}
+.badge.pending{background:rgba(251,191,36,.09)!important;color:#fde68a!important;border-color:rgba(251,191,36,.20)!important}
+.badge.assigned,.badge.success{background:rgba(52,211,153,.09)!important;color:#bbf7d0!important;border-color:rgba(52,211,153,.20)!important}
+.badge.rejected,.badge.danger{background:rgba(251,113,133,.09)!important;color:#fecdd3!important;border-color:rgba(251,113,133,.20)!important}
+.badge.admin{background:rgba(139,92,246,.10)!important;color:#ddd6fe!important;border-color:rgba(139,92,246,.20)!important}
+.badge.ok{background:rgba(52,211,153,.09)!important;color:#bbf7d0!important;border-color:rgba(52,211,153,.20)!important}
+.badge.warning{background:rgba(251,191,36,.09)!important;color:#fde68a!important;border-color:rgba(251,191,36,.20)!important}
+.badge.error{background:rgba(239,68,68,.09)!important;color:#fecaca!important;border-color:rgba(239,68,68,.20)!important}
+.empty{
+  padding:32px 18px!important;text-align:center!important;
+  color:#8fa3be!important;background:rgba(4,15,30,.45)!important;
+  border:1px dashed rgba(103,232,249,.16)!important;border-radius:12px!important
+}
+.stats{gap:11px!important}
+.stat,.stat-card{
+  background:linear-gradient(145deg,#0b203d,#08182d)!important;
+  border:1px solid rgba(148,163,184,.10)!important;border-radius:14px!important
+}
+.section-header,.section-head{margin-bottom:13px!important}
+.search,.faculty-search{background:#07152a!important;color:#fff!important}
+@media(max-width:850px){
+  .topbar{position:relative!important;align-items:flex-start!important}
+  .container{width:94%!important}
+  .sf-feature-scroll{width:94%!important}
+}
+@media(max-width:600px){
+  .container{padding-top:18px!important}
+  .hero,.hero-card,.section,.card,.content-card,.side-card{padding:15px!important;border-radius:14px!important}
+  .sf-feature-scroll a{font-size:9px;min-height:32px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;scroll-behavior:auto!important}
+}
 
+/* Teacher profile button + popup */
+.topbar-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.profile-button{
+  border:1px solid rgba(103,232,249,.28);
+  background:rgba(8,24,43,.92);
+  color:#f7fbff;
+  min-height:38px;
+  padding:9px 14px;
+  border-radius:10px;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  transition:.18s ease;
+}
+.profile-button:hover{
+  background:rgba(14,41,72,.98);
+  border-color:rgba(103,232,249,.55);
+  transform:translateY(-1px);
+}
+.profile-modal{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(2,8,23,.72);
+  backdrop-filter:blur(8px);
+}
+.profile-modal.open{display:flex;}
+.profile-modal-card{
+  width:min(620px,100%);
+  max-height:min(760px,92vh);
+  overflow:auto;
+  border-radius:20px;
+  padding:22px;
+  background:linear-gradient(145deg,rgba(8,27,47,.98),rgba(6,20,36,.98));
+  border:1px solid rgba(103,232,249,.24);
+  box-shadow:0 24px 80px rgba(0,0,0,.42);
+}
+.profile-modal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:18px;
+}
+.profile-modal-head h2{margin:0!important;color:#fff!important;}
+.profile-modal-head p{margin:5px 0 0!important;color:#9fb1cb!important;font-size:12px;}
+.profile-close{
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  border:1px solid rgba(148,163,184,.15);
+  background:rgba(255,255,255,.05);
+  color:#fff;
+  cursor:pointer;
+  font-size:18px;
+  font-weight:900;
+}
+.profile-details{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.profile-detail{
+  padding:16px;
+  border-radius:14px;
+  background:rgba(11,32,58,.82);
+  border:1px solid rgba(148,163,184,.09);
+}
+.profile-detail.full{grid-column:1/-1;}
+.profile-detail span.label{
+  display:block;
+  margin-bottom:7px;
+  color:#7f9abb;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+.profile-detail strong{
+  display:block;
+  color:#fff;
+  font-size:14px;
+}
+.profile-modal-footer{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:18px;
+}
+.profile-done{
+  border:0;
+  border-radius:10px;
+  padding:10px 18px;
+  background:#22d3ee;
+  color:#042031;
+  font-weight:900;
+  cursor:pointer;
+}
+@media(max-width:600px){
+  .profile-details{grid-template-columns:1fr;}
+  .profile-detail.full{grid-column:auto;}
+  .profile-modal{padding:12px;}
+  .profile-modal-card{padding:16px;border-radius:16px;}
+  .topbar-actions{width:100%;justify-content:flex-end;}
+}
+
+</style>
+
+
+<style id="sf-phone-ready">
+html,body{width:100%;max-width:100%;min-width:0!important;overflow-x:hidden!important}
+img,svg,video,canvas{max-width:100%;height:auto}
+input,select,textarea,button{max-width:100%}
+a,button,input,select,textarea{touch-action:manipulation}
+@media (max-width:768px){
+.topbar{width:100%!important;padding:12px 14px!important;gap:10px!important;align-items:stretch!important}
+.topbar>div,.topbar .brand,.topbar-actions{width:100%!important;min-width:0!important}
+.topbar h1,.brand h1{font-size:18px!important;line-height:1.22!important;overflow-wrap:anywhere!important}
+.topbar p,.brand p{font-size:11px!important;line-height:1.4!important}
+.topbar-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important;justify-content:stretch!important}
+.topbar-actions>*{flex:1 1 130px!important}
+.logout,.profile-button{width:100%!important;min-height:44px!important;justify-content:center!important}
+.sf-feature-nav{width:100%!important;max-width:100%!important}
+.sf-feature-scroll{width:100%!important;max-width:100%!important;padding:8px 10px!important;gap:8px!important;overflow-x:auto!important;overscroll-behavior-x:contain;scrollbar-width:none!important;-webkit-overflow-scrolling:touch}
+.sf-feature-scroll::-webkit-scrollbar{display:none}
+.sf-feature-scroll a{min-height:42px!important;padding:0 13px!important;font-size:11px!important;flex:0 0 auto!important}
+.container,main.container,.page-container,.page{width:100%!important;max-width:none!important;margin:0!important;padding:14px 10px 30px!important}
+.hero,.hero-card,.section,.card,.content-card,.side-card,.panel,.info-card{width:100%!important;min-width:0!important;max-width:100%!important;margin-left:0!important;margin-right:0!important;padding:14px!important;border-radius:14px!important}
+.stats,.feature-grid,.team-grid,.form-grid,.profile-details,.profile-grid,.grid{grid-template-columns:1fr!important;gap:10px!important}
+.stats{margin:12px 0!important}.stat-card{padding:14px!important;min-width:0!important}.stat-value{font-size:24px!important}
+h1{font-size:24px!important;line-height:1.18!important}h2{font-size:20px!important;line-height:1.25!important}h3{font-size:16px!important;line-height:1.3!important}h4{font-size:14px!important}
+p,.section-description,.sub,.muted,.note,.reason{line-height:1.6!important;overflow-wrap:anywhere!important}
+.actions,.action-row,.button-row{display:flex!important;flex-direction:column!important;align-items:stretch!important;width:100%!important;gap:8px!important}
+.actions a,.action-row a,.button-row a,.actions button,.action-row button,.button-row button{width:100%!important;min-height:44px!important;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important}
+.section-header{flex-direction:column!important;align-items:flex-start!important;gap:8px!important}
+form{width:100%!important;max-width:100%!important}form>div,.form-row,.field-row,.form-grid>*{min-width:0!important}
+label{font-size:12px!important}input,select,textarea{width:100%!important;min-height:44px!important;font-size:16px!important}textarea{min-height:100px!important}.btn{min-height:44px!important}
+.table-wrapper,.wrap,.table-container,.table-responsive{width:100%!important;max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-x:contain;border-radius:10px}
+.table-wrapper table,.wrap table,.table-container table,.table-responsive table{min-width:640px!important}th,td{font-size:12px!important;padding:9px 8px!important}
+.profile-modal{padding:10px!important;align-items:flex-start!important}.profile-modal-card{width:100%!important;max-width:100%!important;max-height:92vh!important;margin-top:4vh!important;padding:15px!important;border-radius:16px!important}.profile-details{grid-template-columns:1fr!important}.profile-detail.full{grid-column:auto!important}.profile-modal-footer{width:100%!important}.profile-done{width:100%!important;min-height:44px!important}
+.nav-links{width:100%!important;max-width:100%!important;overflow-x:auto!important;white-space:nowrap!important;-webkit-overflow-scrolling:touch;scrollbar-width:none!important}.nav-links::-webkit-scrollbar{display:none}.nav-links a{min-height:40px!important;display:inline-flex!important;align-items:center!important}
+.login-shell,.login-form,.login-card,.login-panel{width:100%!important;max-width:100%!important}.login-choice-grid{grid-template-columns:1fr!important}.login-choice{min-height:48px!important}.login-input{min-height:48px!important;font-size:16px!important}
+.empty,.empty-state{padding:18px 12px!important;text-align:center!important;overflow-wrap:anywhere!important}.reason{max-width:none!important}.back{font-size:12px!important}
+}
+@media (max-width:420px){
+.container,main.container,.page-container,.page{padding:10px 8px 24px!important}.topbar{padding:10px!important}.sf-feature-scroll{padding:7px 8px!important}.sf-feature-scroll a{min-height:40px!important;padding:0 11px!important;font-size:10px!important}.hero,.hero-card,.section,.card,.content-card,.side-card,.panel,.info-card{padding:12px!important}h1{font-size:21px!important}h2{font-size:18px!important}.stat-value{font-size:22px!important}
+}
+</style>
+
+
+<style id="sf-dual-responsive">
+/* SubstiFlow: desktop + phone responsive layer */
+html, body { width:100%; max-width:100%; overflow-x:hidden; }
+img, svg, video, canvas { max-width:100%; height:auto; }
+button, .btn, .action-button, .action-link, a[role="button"] { -webkit-tap-highlight-color: transparent; }
+
+/* Desktop / laptop: keep full-width information architecture and roomy controls. */
+@media (min-width: 901px) {
+  .container { width:min(1240px,92% ) !important; margin:0 auto !important; }
+  .topbar { padding:16px clamp(20px,3vw,36px) !important; }
+  .sf-feature-scroll { width:min(1240px,92%); flex-wrap:wrap; overflow-x:visible; justify-content:flex-start; }
+  .sf-feature-scroll a { min-height:36px; padding:0 13px; font-size:11px; }
+  .action-row { flex-direction:row !important; align-items:center !important; }
+  table { min-width:720px; }
+  .table-wrapper, .table-wrap, .faculty-grid-wrap, .wrap { max-width:100%; overflow-x:auto !important; }
+  input, select, textarea { min-height:40px; }
+}
+
+/* Tablet. */
+@media (min-width: 601px) and (max-width: 900px) {
+  .container { width:94% !important; }
+  .sf-feature-scroll { width:94%; overflow-x:auto; }
+  .action-row { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .action-row .action-button, .action-row .btn, .action-row a { width:100%; }
+}
+
+/* Phone. */
+@media (max-width: 600px) {
+  body { font-size:14px !important; }
+  .topbar { gap:10px !important; padding:12px !important; }
+  .topbar h1 { font-size:18px !important; line-height:1.2 !important; }
+  .topbar p { font-size:11px !important; }
+  .topbar .logout { min-height:42px !important; padding:0 12px !important; }
+  .container { width:calc(100% - 20px) !important; margin:0 auto !important; padding:14px 0 30px !important; }
+  .sf-feature-scroll { width:calc(100% - 12px); margin:0 auto; padding:8px 0; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .sf-feature-scroll a { min-height:40px !important; padding:0 12px !important; font-size:11px !important; }
+  .action-row { display:grid !important; grid-template-columns:1fr !important; gap:9px !important; }
+  .action-row .action-button, .action-row .btn, .action-row a { width:100% !important; min-height:44px !important; }
+  button, .btn, input[type=submit], input[type=button] { min-height:44px !important; }
+  input, select, textarea { min-height:44px !important; width:100%; font-size:16px !important; }
+  .table-wrapper, .table-wrap, .faculty-grid-wrap, .wrap { width:100% !important; overflow-x:auto !important; -webkit-overflow-scrolling:touch; }
+  table { min-width:720px; }
+  th, td { white-space:nowrap; }
+  .stats { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+  .stats > * { min-width:0 !important; }
+  .profile-grid, .grid, .cards-grid, .dashboard-grid, .content-grid { grid-template-columns:1fr !important; }
+  .modal, .profile-modal, .dialog, .popup { width:calc(100% - 20px) !important; max-width:none !important; max-height:88vh !important; overflow:auto !important; }
+  .modal-actions, .form-actions, .actions, .button-row { flex-direction:column !important; align-items:stretch !important; }
+  .modal-actions > *, .form-actions > *, .actions > *, .button-row > * { width:100% !important; }
+  .hero, .hero-card, .card, .section, .content-card, .panel, .side-card, .info-card { border-radius:14px !important; }
+}
 </style>
 </head>
 
-<body>
+<body class="teacher-page">
 
 <header class="topbar">
     <div>
@@ -455,10 +443,22 @@ tr:hover td,tr:active td{background:rgba(17,67,83,.88) !important;color:#fff !im
     </div>
 
     <div class="topbar-actions">
-        <a href="#teacher-profile" class="profile-top-button">👤 My Profile</a>
+        <button type="button" class="profile-button" id="openProfileBtn" aria-controls="profileModal" aria-expanded="false">👤 Profile</button>
         <a href="{{ url_for('logout') }}" class="logout">Logout</a>
     </div>
 </header>
+<nav class="sf-feature-nav" aria-label="Teacher features">
+  <div class="sf-feature-scroll">
+    
+    <a href="{{ url_for('teacher_today') }}">📅 Today’s Operations</a>
+    <a href="{{ url_for('teacher_timetable') }}">📚 My Timetable</a>
+    <a href="{{ url_for('teacher_unavailability') }}">🕒 Period Unavailability</a>
+    {% if session.get('role') == 'ADMIN' %}
+      <a href="{{ url_for('admin_dashboard') }}">🛠 Admin Dashboard</a>
+    {% endif %}
+  </div>
+</nav>
+
 
 <main class="container">
 
@@ -472,7 +472,7 @@ tr:hover td,tr:active td{background:rgba(17,67,83,.88) !important;color:#fff !im
         </p>
 
         <div class="action-row">
-            <a href="{{ url_for('admin_today') if session.get('role') == 'ADMIN' else url_for('teacher_today') }}"
+            <a href="{{ url_for('teacher_today') if session.get('role') == 'TEACHER' else url_for('admin_today') }}"
                class="action-button operations-button">
                 📅 Today's Operations
             </a>
@@ -490,53 +490,15 @@ tr:hover td,tr:active td{background:rgba(17,67,83,.88) !important;color:#fff !im
     </section>
 
 
-    <!-- TEACHER PROFILE -->
-    <section class="profile-section" id="teacher-profile">
-        <details class="profile-details">
-            <summary>
-                <span class="profile-summary-left">
-                    <span class="profile-icon">👤</span>
-                    <span>Teacher Profile</span>
-                </span>
-                <span class="profile-summary-right">Tap to view <span class="profile-chevron">⌄</span></span>
-            </summary>
-
-            <div class="profile-grid">
-                <div class="info-card">
-                    <span>Teacher ID</span>
-                    <strong>{{ teacher.teacher_id }}</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>Teacher Name</span>
-                    <strong>{{ teacher.teacher_name }}</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>Department</span>
-                    <strong>{{ teacher.department or 'None' }}</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>Designation</span>
-                    <strong>{{ teacher.designation or 'Faculty' }}</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>Campus / Scope</span>
-                    <strong>{{ teacher.campus or 'Main Campus' }}</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>Substitute Eligibility</span>
-                    {% if teacher.is_substitute_eligible %}
-                        <span class="badge success">YES</span>
-                    {% else %}
-                        <span class="badge danger">NO</span>
-                    {% endif %}
-                </div>
+    <!-- PROFILE ACCESS -->
+    <section class="card" style="padding:16px 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <div>
+                <strong style="display:block;font-size:15px;">👤 Your Profile</strong>
+                <span style="display:block;margin-top:4px;color:#9fb1cb;font-size:12px;">View your faculty details from the Profile button.</span>
             </div>
-        </details>
+            <button type="button" class="profile-button" id="openProfileBtn2" aria-controls="profileModal">View Profile</button>
+        </div>
     </section>
 
 
@@ -640,8 +602,98 @@ tr:hover td,tr:active td{background:rgba(17,67,83,.88) !important;color:#fff !im
         </p>
     </section>
 
+
+    <!-- PROFILE MODAL -->
+    <div class="profile-modal" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileTitle" aria-hidden="true">
+        <div class="profile-modal-card">
+            <div class="profile-modal-head">
+                <div>
+                    <h2 id="profileTitle">👤 Faculty Profile</h2>
+                    <p>Your registered faculty information.</p>
+                </div>
+                <button type="button" class="profile-close" id="closeProfileBtn" aria-label="Close profile">×</button>
+            </div>
+
+            <div class="profile-details">
+                <div class="profile-detail">
+                    <span class="label">Teacher ID</span>
+                    <strong>{{ teacher.teacher_id }}</strong>
+                </div>
+                <div class="profile-detail">
+                    <span class="label">Teacher Name</span>
+                    <strong>{{ teacher.teacher_name }}</strong>
+                </div>
+                <div class="profile-detail">
+                    <span class="label">Department</span>
+                    <strong>{{ teacher.department or 'None' }}</strong>
+                </div>
+                <div class="profile-detail">
+                    <span class="label">Designation</span>
+                    <strong>{{ teacher.designation or 'Faculty' }}</strong>
+                </div>
+                <div class="profile-detail">
+                    <span class="label">Campus / Scope</span>
+                    <strong>{{ teacher.campus or 'Main Campus' }}</strong>
+                </div>
+                <div class="profile-detail">
+                    <span class="label">Substitute Eligibility</span>
+                    {% if teacher.is_substitute_eligible %}
+                        <span class="badge success">YES</span>
+                    {% else %}
+                        <span class="badge danger">NO</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="profile-modal-footer">
+                <button type="button" class="profile-done" id="doneProfileBtn">Done</button>
+            </div>
+        </div>
+    </div>
+
 </main>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+<script>
+(function () {
+    const modal = document.getElementById('profileModal');
+    const openButtons = [
+        document.getElementById('openProfileBtn'),
+        document.getElementById('openProfileBtn2')
+    ].filter(Boolean);
+    const closeButton = document.getElementById('closeProfileBtn');
+    const doneButton = document.getElementById('doneProfileBtn');
+
+    function openProfile() {
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        openButtons.forEach(btn => btn.setAttribute('aria-expanded', 'true'));
+        document.body.style.overflow = 'hidden';
+        closeButton.focus();
+    }
+
+    function closeProfile() {
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        openButtons.forEach(btn => btn.setAttribute('aria-expanded', 'false'));
+        document.body.style.overflow = '';
+    }
+
+    openButtons.forEach(btn => btn.addEventListener('click', openProfile));
+    closeButton.addEventListener('click', closeProfile);
+    doneButton.addEventListener('click', closeProfile);
+
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) closeProfile();
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && modal.classList.contains('open')) {
+            closeProfile();
+        }
+    });
+})();
+</script>
+
 </body>
 </html>
