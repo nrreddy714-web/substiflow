@@ -14,7 +14,9 @@ from algorithm import (
 
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "local-development-only-secret-key")
+import os
+
+app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key")
 
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
