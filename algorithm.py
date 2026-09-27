@@ -493,13 +493,12 @@ def calculate_score(candidate):
     return float(score)
 
 
-def build_reason(candidate, batch_assignments=1):
-    """Build a transparent reason using availability and workload balancing."""
+def build_reason(candidate):
+    """Build a reason using only availability and workload information."""
     return (
         "Available teacher selected using availability and workload balancing. "
         f"Daily classes: {candidate['daily_classes']}. "
         f"Substitutions today: {candidate['substitutions_today']}. "
-        f"Assignments in this batch: {batch_assignments}. "
         "Recommendation requires HOD approval."
     )
 
@@ -512,15 +511,18 @@ def create_recommendations(absent_teacher_id, assignment_date):
     """
     Create PENDING recommendations for every affected Main Campus BCA period.
 
-    Rules:
-    1. Any active, substitution-eligible and available teacher may be selected.
-    2. Workload/fairness is used for ranking.
-    3. For every period, prefer the currently available teacher with the fewest
-       assignments already given in this absence batch. Reuse occurs only when
-       the availability/workload comparison makes that teacher the best current
-       choice.
-    4. If nobody is available, create ADMIN_ACTION.
-    5. Recommendations are never automatically final.
+    Allocation strategy:
+    1. Check all affected periods first and build the real available-teacher
+       list for each period.
+    2. Process the most constrained periods first (fewest available teachers).
+       This prevents a flexible period from taking a teacher who is the only
+       option for a later period.
+    3. For each period, prefer the currently available teacher with the fewest
+       assignments already given in this absence batch.
+    4. Use regular workload and historical substitution count as tie-breakers.
+    5. A teacher is reused only when no less-used available teacher exists.
+    6. If nobody is available, create ADMIN_ACTION.
+    7. Recommendations are never automatically final.
     """
     assignment_date = normalize_date(assignment_date)
     affected = get_affected_periods(absent_teacher_id, assignment_date)
@@ -533,25 +535,21 @@ def create_recommendations(absent_teacher_id, assignment_date):
     created_admin_action = 0
     skipped = 0
 
-    # Teachers reserved for a specific date + period while this batch is
-    # being generated. This prevents one substitute from being recommended
-    # for two different absent teachers in the same period.
-    reserved_by_slot = {}
-
-    # Number of substitutions already allocated in this absence batch.
-    # At every period, the algorithm prefers an available teacher with the
-    # lowest batch-assignment count. This guarantees a balanced distribution:
-    # if Teacher A and Teacher B are both free, and both can cover the period,
-    # the teacher with fewer assignments in this batch is preferred.
+    # Track a substitute already attached to an existing active assignment
+    # for this date so the balancing logic also respects prior runs.
     batch_assignment_counts = {}
+    reserved_by_slot = {}
 
     connection = get_connection()
     cursor = connection.cursor(dictionary=True)
 
     try:
+        period_work = []
+
+        # ------------------------------------------------------------
+        # PHASE 1: BUILD ALL CANDIDATE LISTS BEFORE MAKING CHOICES
+        # ------------------------------------------------------------
         for period in affected:
-            # Avoid creating duplicate active recommendations for the same
-            # absent teacher/date/class/period.
             cursor.execute(
                 """
                 SELECT assignment_id
@@ -571,10 +569,8 @@ def create_recommendations(absent_teacher_id, assignment_date):
                 ),
             )
             existing = cursor.fetchone()
+
             if existing:
-                # If an active recommendation already exists for this slot,
-                # reserve that teacher so another absence at the same period
-                # cannot receive the same substitute.
                 cursor.execute(
                     """
                     SELECT substitute_teacher_id
@@ -594,10 +590,13 @@ def create_recommendations(absent_teacher_id, assignment_date):
                     ),
                 )
                 existing_assignment = cursor.fetchone()
+
                 if existing_assignment and existing_assignment["substitute_teacher_id"] is not None:
+                    teacher_id = int(existing_assignment["substitute_teacher_id"])
                     slot = (assignment_date, int(period["period_no"]))
-                    reserved_by_slot.setdefault(slot, set()).add(
-                        int(existing_assignment["substitute_teacher_id"])
+                    reserved_by_slot.setdefault(slot, set()).add(teacher_id)
+                    batch_assignment_counts[teacher_id] = (
+                        batch_assignment_counts.get(teacher_id, 0) + 1
                     )
 
                 skipped += 1
@@ -614,45 +613,63 @@ def create_recommendations(absent_teacher_id, assignment_date):
             slot = (assignment_date, int(period["period_no"]))
             reserved_teachers = reserved_by_slot.setdefault(slot, set())
 
-            # Get every teacher who is actually available for this exact slot.
-            # We do NOT exclude a teacher just because they were used earlier
-            # in this absence batch. Instead, we rank all currently available
-            # teachers by how many periods they have already received in THIS
-            # batch. This is the key fairness rule.
             candidates = find_candidates(
                 assignment,
                 extra_rejected=reserved_teachers,
             )
 
+            period_work.append({
+                "period": period,
+                "assignment": assignment,
+                "candidates": candidates,
+            })
+
+        # ------------------------------------------------------------
+        # PHASE 2: PROCESS SCARCE / CONSTRAINED PERIODS FIRST
+        # ------------------------------------------------------------
+        # Example:
+        #   P3 has only Swathy available  -> handle P3 first.
+        #   P1 has Swathy + Raja available -> handle P1 later.
+        # This prevents P1 from consuming Swathy when Raja can cover P1.
+        period_work.sort(
+            key=lambda item: (
+                len(item["candidates"]),
+                int(item["period"]["period_no"]),
+            )
+        )
+
+        # ------------------------------------------------------------
+        # PHASE 3: BALANCED ASSIGNMENT
+        # ------------------------------------------------------------
+        for item in period_work:
+            period = item["period"]
+            assignment = item["assignment"]
+            candidates = item["candidates"]
+
             if candidates:
-                # First minimize assignments already given in this batch.
-                # Then use the normal workload/fairness criteria. Therefore,
-                # when A and B are both free, the one with 0 batch assignments
-                # is selected before the one with 1 or more. A teacher is reused
-                # only when all better-balanced available choices have already
-                # received the same or a higher batch count, or the teacher is
-                # the only available choice for that period.
-                candidates.sort(
-                    key=lambda t: (
-                        int(batch_assignment_counts.get(int(t["teacher_id"]), 0)),
-                        int(t["daily_classes"]),
-                        int(t["substitutions_today"]),
-                        int(t["total_substitutions"]),
-                        t["teacher_name"].lower(),
-                    )
+                # First minimize how many substitutions this teacher has
+                # already received in THIS absence batch. Only then use the
+                # normal workload/fairness criteria.
+                candidate = min(
+                    candidates,
+                    key=lambda teacher: (
+                        batch_assignment_counts.get(
+                            int(teacher["teacher_id"]), 0
+                        ),
+                        int(teacher["daily_classes"]),
+                        int(teacher["substitutions_today"]),
+                        int(teacher["total_substitutions"]),
+                        teacher["teacher_name"].lower(),
+                    ),
                 )
 
-                candidate = candidates[0]
-                candidate_id = int(candidate["teacher_id"])
-                reserved_teachers.add(candidate_id)
-                batch_assignment_counts[candidate_id] = (
-                    batch_assignment_counts.get(candidate_id, 0) + 1
+                teacher_id = int(candidate["teacher_id"])
+                batch_assignment_counts[teacher_id] = (
+                    batch_assignment_counts.get(teacher_id, 0) + 1
                 )
+
                 score = calculate_score(candidate)
-                reason = build_reason(
-                    candidate,
-                    batch_assignments=batch_assignment_counts[candidate_id],
-                )
+                reason = build_reason(candidate)
 
                 cursor.execute(
                     """
@@ -676,7 +693,7 @@ def create_recommendations(absent_teacher_id, assignment_date):
                         period["class_id"],
                         period["subject_id"],
                         absent_teacher_id,
-                        candidate["teacher_id"],
+                        teacher_id,
                         score,
                         reason,
                     ),
@@ -684,9 +701,9 @@ def create_recommendations(absent_teacher_id, assignment_date):
                 created_pending += 1
             else:
                 reason = (
-                    "No available teacher found after checking "
-                    "timetable, absence, unavailability, existing substitutions "
-                    "and campus movement. Admin must manually arrange this period."
+                    "No available teacher found after checking timetable, "
+                    "absence, unavailability, existing substitutions and "
+                    "campus movement. Admin must manually arrange this period."
                 )
                 cursor.execute(
                     """
