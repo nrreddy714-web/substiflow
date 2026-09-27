@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, session
 from database import get_connection
 from werkzeug.security import check_password_hash
@@ -13,7 +14,13 @@ from algorithm import (
 
 
 app = Flask(__name__)
-app.secret_key = "smart-faculty-substitute-system-secret-key"
+app.secret_key = os.getenv("SECRET_KEY", "local-development-only-secret-key")
+
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.getenv("SESSION_COOKIE_SECURE", "0") == "1",
+)
 
 
 # ============================================================

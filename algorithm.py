@@ -33,247 +33,190 @@ def period_block(period_no):
 
 
 # ============================================================
-# LAB / OCCUPANCY HELPERS
-# ============================================================
-
-
-LAB_LABELS = {
-    "CA LAB",
-    "PST LAB",
-    "OAT LAB",
-    "DBMS LAB",
-    "AI LAB",
-    "ML LAB",
-    "DIP LAB",
-}
-
-
-def _normalize_campus(value):
-    return str(value or "").strip().lower()
-
-
-def is_lab_row(period_type, period_label):
-    period_type = str(period_type or "").strip().upper()
-    period_label = str(period_label or "").strip().upper()
-    return period_type == "LAB" or period_label in LAB_LABELS or period_label.endswith(" LAB")
-
-
-def get_lab_duration(cursor, class_id, day_code, start_period, campus, period_label):
-    """Return the actual number of periods occupied by a lab.
-
-    OAT LAB is campus-specific: Main Campus = 3 periods (P1-P3),
-    Women's Campus = 2 periods (P2-P3). Other known BCA labs are 2 periods.
-    The class timetable is used as a fallback for any future lab label.
-    """
-    label = str(period_label or "").strip().upper()
-    campus_text = _normalize_campus(campus)
-
-    if label == "OAT LAB":
-        return 2 if "women" in campus_text else 3
-
-    if label in LAB_LABELS:
-        return 2
-
-    cursor.execute(
-        """
-        SELECT duration_hours
-        FROM class_timetable
-        WHERE class_id = %s
-          AND day_of_week = %s
-          AND period_no = %s
-        LIMIT 1
-        """,
-        (class_id, day_code, start_period),
-    )
-    row = cursor.fetchone()
-    if row and row.get("duration_hours"):
-        try:
-            return max(1, int(round(float(row["duration_hours"]))))
-        except (TypeError, ValueError):
-            pass
-
-    return 2
-
-
-def _get_teacher_day_occupancy(cursor, teacher_id, day_code):
-    """Return occupied periods for a teacher, expanding merged lab rows.
-
-    A lab may be stored as one row (for example P5 with duration 2) or as
-    multiple consecutive rows (for example P1 and P2). Both representations
-    are treated as the same occupied time block and never double-counted.
-    """
-    cursor.execute(
-        """
-        SELECT
-            timetable_id,
-            class_id,
-            day_of_week,
-            period_no,
-            campus,
-            period_type,
-            period_label
-        FROM timetable
-        WHERE teacher_id = %s
-          AND day_of_week = %s
-        ORDER BY period_no, timetable_id
-        """,
-        (teacher_id, day_code),
-    )
-    rows = cursor.fetchall()
-
-    occupancy = {}
-    lab_groups = {}
-
-    for row in rows:
-        period_no = int(row["period_no"])
-        if not is_lab_row(row["period_type"], row["period_label"]):
-            occupancy.setdefault(
-                period_no,
-                {
-                    "campus": _normalize_campus(row["campus"]),
-                    "timetable_id": row["timetable_id"],
-                },
-            )
-            continue
-
-        key = (
-            int(row["class_id"]),
-            _normalize_campus(row["campus"]),
-            str(row["period_label"] or "").strip().upper(),
-        )
-        lab_groups.setdefault(key, []).append(row)
-
-    for rows_in_lab in lab_groups.values():
-        start_period = min(int(r["period_no"]) for r in rows_in_lab)
-        first = min(rows_in_lab, key=lambda r: int(r["period_no"]))
-        duration = get_lab_duration(
-            cursor,
-            int(first["class_id"]),
-            day_code,
-            start_period,
-            first["campus"],
-            first["period_label"],
-        )
-
-        for occupied_period in range(start_period, min(6, start_period + duration - 1) + 1):
-            occupancy.setdefault(
-                occupied_period,
-                {
-                    "campus": _normalize_campus(first["campus"]),
-                    "timetable_id": first["timetable_id"],
-                },
-            )
-
-    return occupancy
-
-
-def _teacher_occupies_period(cursor, teacher_id, day_code, period_no):
-    occupancy = _get_teacher_day_occupancy(cursor, teacher_id, day_code)
-    return int(period_no) in occupancy
-
-
-# ============================================================
 # COMMON FACULTY / CAMPUS MOVEMENT
 # ============================================================
 
-def _teacher_occupied_periods(cursor, teacher_id, day_code):
-    """Return every period occupied by a teacher, expanding lab duration."""
-    cursor.execute(
-        """
-        SELECT
-            tt.period_no,
-            COALESCE(ct.duration_hours, 1) AS duration_hours
-        FROM timetable tt
-        LEFT JOIN class_timetable ct
-          ON ct.class_id = tt.class_id
-         AND ct.day_of_week = tt.day_of_week
-         AND ct.period_no = tt.period_no
-        WHERE tt.teacher_id = %s
-          AND tt.day_of_week = %s
-        """,
-        (teacher_id, day_code),
-    )
-
-    occupied = set()
-
-    for row in cursor.fetchall():
-        start_period = int(row["period_no"])
-
-        try:
-            duration = max(
-                1,
-                int(round(float(row["duration_hours"] or 1)))
-            )
-        except (TypeError, ValueError):
-            duration = 1
-
-        for period in range(
-            start_period,
-            start_period + duration
-        ):
-            if 1 <= period <= 6:
-                occupied.add(period)
-
-    return occupied
-
-
-def common_teacher_has_womens_class_in_block(
-    cursor,
-    teacher_id,
-    day_code,
-    period_no
-):
+def common_teacher_has_womens_class_in_block(cursor, teacher_id, day_code, period_no):
     """
-    Common faculty cannot switch between Women's Campus
-    and Main Campus inside the same morning/afternoon block.
-
-    Lab duration is expanded so merged lab rows protect
-    every period occupied by that lab.
+    Common faculty cannot switch between Women's Campus and Main Campus
+    inside the same morning/afternoon block.
     """
-
     block_start = 1 if int(period_no) <= 3 else 4
     block_end = 3 if int(period_no) <= 3 else 6
 
     cursor.execute(
         """
-        SELECT
-            tt.period_no,
-            COALESCE(ct.duration_hours, 1) AS duration_hours
-        FROM timetable tt
-        LEFT JOIN class_timetable ct
-          ON ct.class_id = tt.class_id
-         AND ct.day_of_week = tt.day_of_week
-         AND ct.period_no = tt.period_no
-        WHERE tt.teacher_id = %s
-          AND tt.day_of_week = %s
-          AND LOWER(COALESCE(tt.campus, '')) LIKE 'women%%'
+        SELECT COUNT(*) AS total
+        FROM timetable
+        WHERE teacher_id = %s
+          AND day_of_week = %s
+          AND period_no BETWEEN %s AND %s
+          AND LOWER(COALESCE(campus, '')) LIKE 'women%%'
         """,
-        (teacher_id, day_code),
+        (teacher_id, day_code, block_start, block_end),
     )
+    return cursor.fetchone()["total"] > 0
 
-    for row in cursor.fetchall():
-        start_period = int(row["period_no"])
 
-        try:
-            duration = max(
-                1,
-                int(round(float(row["duration_hours"] or 1)))
+def is_teacher_available(
+    teacher_id,
+    assignment_date,
+    period_no,
+    absent_teacher_id=None,
+    exclude_assignment_id=None,
+):
+    """Return (True, reason) if a teacher can take the period."""
+    assignment_date = normalize_date(assignment_date)
+    day_code = get_day_code(assignment_date)
+
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            """
+            SELECT teacher_id, teacher_name, campus,
+                   is_active, is_substitute_eligible
+            FROM teachers
+            WHERE teacher_id = %s
+            LIMIT 1
+            """,
+            (teacher_id,),
+        )
+        teacher = cursor.fetchone()
+
+        if not teacher:
+            return False, "Teacher not found."
+        if not teacher["is_active"]:
+            return False, "Teacher account is inactive."
+        if not teacher["is_substitute_eligible"]:
+            return False, "Teacher is not eligible for substitution."
+        if absent_teacher_id is not None and int(teacher_id) == int(absent_teacher_id):
+            return False, "Absent teacher cannot be selected."
+
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS total
+            FROM timetable
+            WHERE teacher_id = %s
+              AND day_of_week = %s
+              AND period_no = %s
+            """,
+            (teacher_id, day_code, period_no),
+        )
+        if cursor.fetchone()["total"] > 0:
+            return False, "Teacher already has a timetable class in this period."
+
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS total
+            FROM teacher_absence
+            WHERE teacher_id = %s
+              AND absence_date = %s
+              AND status IN ('PENDING', 'APPROVED')
+            """,
+            (teacher_id, assignment_date),
+        )
+        if cursor.fetchone()["total"] > 0:
+            return False, "Teacher is absent on this date."
+
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS total
+            FROM teacher_unavailability
+            WHERE teacher_id = %s
+              AND unavailable_date = %s
+              AND period_no = %s
+              AND status IN ('PENDING', 'APPROVED')
+            """,
+            (teacher_id, assignment_date, period_no),
+        )
+        if cursor.fetchone()["total"] > 0:
+            return False, "Teacher is unavailable for this period."
+
+        if exclude_assignment_id is None:
+            cursor.execute(
+                """
+                SELECT COUNT(*) AS total
+                FROM substitute_assignments
+                WHERE substitute_teacher_id = %s
+                  AND assignment_date = %s
+                  AND period_no = %s
+                  AND status IN ('PENDING', 'APPROVED', 'ASSIGNED')
+                """,
+                (teacher_id, assignment_date, period_no),
             )
-        except (TypeError, ValueError):
-            duration = 1
+        else:
+            cursor.execute(
+                """
+                SELECT COUNT(*) AS total
+                FROM substitute_assignments
+                WHERE substitute_teacher_id = %s
+                  AND assignment_date = %s
+                  AND period_no = %s
+                  AND assignment_id <> %s
+                  AND status IN ('PENDING', 'APPROVED', 'ASSIGNED')
+                """,
+                (teacher_id, assignment_date, period_no, exclude_assignment_id),
+            )
+        if cursor.fetchone()["total"] > 0:
+            return False, "Teacher already has another substitution in this period."
 
-        end_period = start_period + duration - 1
+        # Campus movement rule applies to teachers whose timetable shows
+        # Women's Campus activity (the COMMON faculty).
+        # A teacher whose regular campus is Women's Campus only is not a
+        # Main Campus substitute. Common faculty are detected from their
+        # timetable because they appear in both campus schedules.
+        cursor.execute(
+            """
+            SELECT
+                LOWER(COALESCE(campus, '')) AS campus
+            FROM teachers
+            WHERE teacher_id = %s
+            LIMIT 1
+            """,
+            (teacher_id,),
+        )
+        campus_row = cursor.fetchone()
+        campus = (campus_row["campus"] if campus_row else "").strip()
 
-        if start_period <= block_end and end_period >= block_start:
-            return True
+        cursor.execute(
+            """
+            SELECT
+                SUM(CASE WHEN LOWER(COALESCE(campus, '')) LIKE 'main%%' THEN 1 ELSE 0 END) AS main_count,
+                SUM(CASE WHEN LOWER(COALESCE(campus, '')) LIKE 'women%%' THEN 1 ELSE 0 END) AS women_count
+            FROM timetable
+            WHERE teacher_id = %s
+            """,
+            (teacher_id,),
+        )
+        campus_counts = cursor.fetchone()
+        main_count = int(campus_counts["main_count"] or 0)
+        women_count = int(campus_counts["women_count"] or 0)
 
-    return False
+        common_teacher = main_count > 0 and women_count > 0
+        women_only = women_count > 0 and main_count == 0
+
+        if women_only or campus == "women campus" and not common_teacher:
+            return False, "Teacher belongs to Women's Campus."
+
+        if common_teacher_has_womens_class_in_block(
+            cursor, teacher_id, day_code, period_no
+        ):
+            return False, "Common faculty is at Women's Campus in this block."
+
+        return True, "Available"
+    finally:
+        cursor.close()
+        connection.close()
+
+
 # ============================================================
 # AFFECTED PERIODS
 # ============================================================
 
 def get_affected_periods(absent_teacher_id, assignment_date):
-    """Get all affected Main Campus BCA periods, expanding lab durations."""
+    """Get all Main Campus BCA periods taught by the absent teacher."""
     assignment_date = normalize_date(assignment_date)
     day_code = get_day_code(assignment_date)
 
@@ -288,7 +231,12 @@ def get_affected_periods(absent_teacher_id, assignment_date):
                 tt.teacher_id AS absent_teacher_id,
                 tt.class_id,
                 c.class_name,
+
+                -- Some imported teacher timetable rows may not have a
+                -- subject_id. In that case, recover the subject from the
+                -- class timetable for the same class/day/period.
                 COALESCE(tt.subject_id, ct.subject_id) AS subject_id,
+
                 s.subject_name,
                 tt.day_of_week,
                 tt.period_no,
@@ -298,57 +246,24 @@ def get_affected_periods(absent_teacher_id, assignment_date):
             FROM timetable tt
             JOIN classes c
               ON tt.class_id = c.class_id
+
             LEFT JOIN class_timetable ct
               ON ct.class_id = tt.class_id
              AND ct.day_of_week = tt.day_of_week
              AND ct.period_no = tt.period_no
+
             LEFT JOIN subjects s
               ON s.subject_id = COALESCE(tt.subject_id, ct.subject_id)
+
             WHERE tt.teacher_id = %s
               AND tt.day_of_week = %s
               AND LOWER(COALESCE(tt.campus, '')) LIKE 'main%%'
               AND LOWER(COALESCE(c.class_name, '')) LIKE '%%bca%%'
-            ORDER BY tt.period_no, tt.timetable_id
+            ORDER BY tt.period_no
             """,
             (absent_teacher_id, day_code),
         )
-        rows = cursor.fetchall()
-
-        affected = {}
-        lab_groups = {}
-
-        for row in rows:
-            period_no = int(row["period_no"])
-            if not is_lab_row(row["period_type"], row["period_label"]):
-                affected[(int(row["class_id"]), period_no)] = dict(row)
-                continue
-
-            key = (
-                int(row["class_id"]),
-                _normalize_campus(row["campus"]),
-                str(row["period_label"] or "").strip().upper(),
-            )
-            lab_groups.setdefault(key, []).append(row)
-
-        for rows_in_lab in lab_groups.values():
-            start_row = min(rows_in_lab, key=lambda r: int(r["period_no"]))
-            start_period = int(start_row["period_no"])
-            duration = get_lab_duration(
-                cursor,
-                int(start_row["class_id"]),
-                day_code,
-                start_period,
-                start_row["campus"],
-                start_row["period_label"],
-            )
-
-            for occupied_period in range(
-                start_period, min(6, start_period + duration - 1) + 1
-            ):
-                affected[(int(start_row["class_id"]), occupied_period)] = dict(start_row)
-                affected[(int(start_row["class_id"]), occupied_period)]["period_no"] = occupied_period
-
-        return sorted(affected.values(), key=lambda r: (r["period_no"], r["class_id"]))
+        return cursor.fetchall()
     finally:
         cursor.close()
         connection.close()
@@ -386,18 +301,8 @@ def get_rejected_teacher_ids(assignment):
         connection.close()
 
 
-def _get_free_period_count(cursor, teacher_id, day_code):
-    """Return the number of free periods (out of P1-P6) on a day.
-
-    Occupancy includes expanded multi-period labs, so a two-period lab
-    consumes two periods for availability and priority purposes.
-    """
-    occupied = _get_teacher_day_occupancy(cursor, teacher_id, day_code)
-    return max(0, 6 - len(occupied))
-
-
 def find_candidates(assignment, extra_rejected=None):
-    """Find valid teachers and prioritize those with more free periods."""
+    """Find every available teacher using availability and workload rules."""
     assignment_date = normalize_date(assignment["assignment_date"])
     period_no = int(assignment["period_no"])
     absent_teacher_id = assignment["absent_teacher_id"]
@@ -419,7 +324,6 @@ def find_candidates(assignment, extra_rejected=None):
                 t.department,
                 t.designation,
                 t.campus,
-                1 AS subject_eligible,
                 (
                     SELECT COUNT(*)
                     FROM timetable tt2
@@ -465,19 +369,13 @@ def find_candidates(assignment, extra_rejected=None):
             if not ok:
                 continue
 
-            teacher["free_periods"] = _get_free_period_count(
-                cursor, teacher["teacher_id"], day_code
-            )
-            teacher["priority_score"] = (
-                int(teacher["free_periods"]) * 100
-                + max(0, 50 - int(teacher["substitutions_today"]) * 10)
-                + max(0, 10 - min(int(teacher["total_substitutions"]), 10))
-            )
             candidates.append(teacher)
 
+        # Balanced ranking: fewer regular classes first, then fewer
+        # substitutions today, then lower historical substitution count.
         candidates.sort(
             key=lambda t: (
-                -int(t["free_periods"]),
+                int(t["daily_classes"]),
                 int(t["substitutions_today"]),
                 int(t["total_substitutions"]),
                 t["teacher_name"].lower(),
@@ -499,7 +397,17 @@ def _availability_with_cursor(
 ):
     day_code = get_day_code(assignment_date)
 
-    if _teacher_occupies_period(cursor, teacher_id, day_code, period_no):
+    cursor.execute(
+        """
+        SELECT COUNT(*) AS total
+        FROM timetable
+        WHERE teacher_id = %s
+          AND day_of_week = %s
+          AND period_no = %s
+        """,
+        (teacher_id, day_code, period_no),
+    )
+    if cursor.fetchone()["total"]:
         return False, "Timetable conflict"
 
     cursor.execute(
@@ -565,60 +473,33 @@ def _availability_with_cursor(
     return True, "Available"
 
 
-def is_teacher_available(
-    teacher_id,
-    assignment_date,
-    period_no,
-    absent_teacher_id=None,
-    exclude_assignment_id=None,
-):
-    """Public availability check used by app.py and manual/reallocation flows.
-
-    Reuses the single shared availability implementation above.
-    """
-    assignment_date = normalize_date(assignment_date)
-    connection = get_connection()
-    cursor = connection.cursor(dictionary=True)
-    try:
-        return _availability_with_cursor(
-            cursor,
-            teacher_id,
-            assignment_date,
-            int(period_no),
-            absent_teacher_id=absent_teacher_id,
-            exclude_assignment_id=exclude_assignment_id,
-        )
-    finally:
-        cursor.close()
-        connection.close()
-
-
 # ============================================================
 # SCORE / REASON
 # ============================================================
 
 def calculate_score(candidate):
-    """Calculate a visible priority score led by free-period availability."""
-    if "priority_score" in candidate:
-        return float(candidate["priority_score"])
+    """Calculate a workload/fairness score for the recommendation."""
+    score = 0
 
-    free_periods = int(candidate.get("free_periods", 0))
-    substitutions_today = int(candidate.get("substitutions_today", 0))
-    total_substitutions = int(candidate.get("total_substitutions", 0))
+    # Fewer regular classes today is better.
+    score += max(0, 100 - int(candidate["daily_classes"]) * 10)
 
-    score = free_periods * 100
-    score += max(0, 50 - substitutions_today * 10)
-    score += max(0, 10 - min(total_substitutions, 10))
+    # Fewer substitutions already assigned today is better.
+    score += max(0, 50 - int(candidate["substitutions_today"]) * 10)
+
+    # Small fairness bonus for teachers with lower historical workload.
+    score += max(0, 10 - min(int(candidate["total_substitutions"]), 10))
+
     return float(score)
 
 
-def build_reason(candidate):
+def build_reason(candidate, batch_assignments=1):
+    """Build a transparent reason using availability and workload balancing."""
     return (
-        "Available teacher. Subject knowledge is treated equally for all teachers. "
-        f"Free periods today: {candidate.get('free_periods', 0)}. "
+        "Available teacher selected using availability and workload balancing. "
         f"Daily classes: {candidate['daily_classes']}. "
         f"Substitutions today: {candidate['substitutions_today']}. "
-        "Higher free-period availability receives higher priority. "
+        f"Assignments in this batch: {batch_assignments}. "
         "Recommendation requires HOD approval."
     )
 
@@ -632,9 +513,12 @@ def create_recommendations(absent_teacher_id, assignment_date):
     Create PENDING recommendations for every affected Main Campus BCA period.
 
     Rules:
-    1. Any available eligible substitute may be selected.
-    2. Teachers with more free periods receive higher priority.
-    3. Lower current substitution load breaks ties.
+    1. Any active, substitution-eligible and available teacher may be selected.
+    2. Workload/fairness is used for ranking.
+    3. For every period, prefer the currently available teacher with the fewest
+       assignments already given in this absence batch. Reuse occurs only when
+       the availability/workload comparison makes that teacher the best current
+       choice.
     4. If nobody is available, create ADMIN_ACTION.
     5. Recommendations are never automatically final.
     """
@@ -653,6 +537,13 @@ def create_recommendations(absent_teacher_id, assignment_date):
     # being generated. This prevents one substitute from being recommended
     # for two different absent teachers in the same period.
     reserved_by_slot = {}
+
+    # Number of substitutions already allocated in this absence batch.
+    # At every period, the algorithm prefers an available teacher with the
+    # lowest batch-assignment count. This guarantees a balanced distribution:
+    # if Teacher A and Teacher B are both free, and both can cover the period,
+    # the teacher with fewer assignments in this batch is preferred.
+    batch_assignment_counts = {}
 
     connection = get_connection()
     cursor = connection.cursor(dictionary=True)
@@ -723,20 +614,45 @@ def create_recommendations(absent_teacher_id, assignment_date):
             slot = (assignment_date, int(period["period_no"]))
             reserved_teachers = reserved_by_slot.setdefault(slot, set())
 
-            # Exclude teachers already reserved for another class in this
-            # exact date/period. find_candidates still applies all normal
-            # availability, timetable, absence, unavailability and campus
-            # movement rules.
+            # Get every teacher who is actually available for this exact slot.
+            # We do NOT exclude a teacher just because they were used earlier
+            # in this absence batch. Instead, we rank all currently available
+            # teachers by how many periods they have already received in THIS
+            # batch. This is the key fairness rule.
             candidates = find_candidates(
                 assignment,
                 extra_rejected=reserved_teachers,
             )
 
             if candidates:
+                # First minimize assignments already given in this batch.
+                # Then use the normal workload/fairness criteria. Therefore,
+                # when A and B are both free, the one with 0 batch assignments
+                # is selected before the one with 1 or more. A teacher is reused
+                # only when all better-balanced available choices have already
+                # received the same or a higher batch count, or the teacher is
+                # the only available choice for that period.
+                candidates.sort(
+                    key=lambda t: (
+                        int(batch_assignment_counts.get(int(t["teacher_id"]), 0)),
+                        int(t["daily_classes"]),
+                        int(t["substitutions_today"]),
+                        int(t["total_substitutions"]),
+                        t["teacher_name"].lower(),
+                    )
+                )
+
                 candidate = candidates[0]
-                reserved_teachers.add(int(candidate["teacher_id"]))
+                candidate_id = int(candidate["teacher_id"])
+                reserved_teachers.add(candidate_id)
+                batch_assignment_counts[candidate_id] = (
+                    batch_assignment_counts.get(candidate_id, 0) + 1
+                )
                 score = calculate_score(candidate)
-                reason = build_reason(candidate)
+                reason = build_reason(
+                    candidate,
+                    batch_assignments=batch_assignment_counts[candidate_id],
+                )
 
                 cursor.execute(
                     """
@@ -768,7 +684,7 @@ def create_recommendations(absent_teacher_id, assignment_date):
                 created_pending += 1
             else:
                 reason = (
-                    "No eligible/available teacher found after checking "
+                    "No available teacher found after checking "
                     "timetable, absence, unavailability, existing substitutions "
                     "and campus movement. Admin must manually arrange this period."
                 )
