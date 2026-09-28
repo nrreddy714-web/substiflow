@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -289,17 +289,6 @@ button, .btn, .action-button, .action-link, a[role="button"] { -webkit-tap-highl
 </head>
 <body class="teacher-page">
 <header class="topbar"><div class="brand"><h1>Smart Faculty Substitute System</h1><p>Main Campus · Teacher Portal</p></div><a href="{{ url_for('logout') }}" class="logout">Logout</a></header>
-<nav class="sf-feature-nav" aria-label="Teacher features">
-  <div class="sf-feature-scroll">
-    <a href="{{ url_for('teacher_dashboard') }}">🏠 My Dashboard</a>
-    <a href="{{ url_for('teacher_today') }}">📅 Today’s Operations</a>
-    <a href="{{ url_for('teacher_timetable') }}">📚 My Timetable</a>
-    <a href="{{ url_for('teacher_unavailability') }}">🕒 Period Unavailability</a>
-    {% if session.get('role') == 'ADMIN' %}
-      <a href="{{ url_for('admin_dashboard') }}">🛠 Admin Dashboard</a>
-    {% endif %}
-  </div>
-</nav>
 
 <main class="container">
 <a href="{{ url_for('teacher_dashboard') }}" class="back">← Back to Teacher Dashboard</a>
@@ -313,3 +302,5 @@ button, .btn, .action-button, .action-link, a[role="button"] { -webkit-tap-highl
 </main>
 </body>
 </html>
+
+

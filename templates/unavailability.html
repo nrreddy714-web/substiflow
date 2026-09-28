@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -292,17 +292,6 @@ button, .btn, .action-button, .action-link, a[role="button"] { -webkit-tap-highl
   </div>
   <a class="logout" href="{{ url_for('logout') }}">Logout</a>
 </header>
-<nav class="sf-feature-nav" aria-label="Teacher features">
-  <div class="sf-feature-scroll">
-    <a href="{{ url_for('teacher_dashboard') }}">🏠 My Dashboard</a>
-    <a href="{{ url_for('teacher_today') }}">📅 Today’s Operations</a>
-    <a href="{{ url_for('teacher_timetable') }}">📚 My Timetable</a>
-    <a href="{{ url_for('teacher_unavailability') }}">🕒 Period Unavailability</a>
-    {% if session.get('role') == 'ADMIN' %}
-      <a href="{{ url_for('admin_dashboard') }}">🛠 Admin Dashboard</a>
-    {% endif %}
-  </div>
-</nav>
 
 
 <main class="container">
@@ -369,3 +358,5 @@ button, .btn, .action-button, .action-link, a[role="button"] { -webkit-tap-highl
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
+
+
