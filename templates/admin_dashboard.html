@@ -5,752 +5,285 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Dashboard | Smart Faculty Substitute System</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
 <style>
-/* =========================================================
-   SubstiFlow Admin Dashboard
-   Simple + clear + beautiful
-   Existing backend/routes are preserved.
-   ========================================================= */
-
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#1f2937}
+.topbar{background:#17233a;color:#fff;padding:18px 30px;display:flex;justify-content:space-between;align-items:center;gap:20px}.brand h1{margin:0;font-size:24px}.brand p{margin:5px 0 0;font-size:13px;opacity:.9}.logout{background:#dc2626;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:600}
+.container{width:min(1250px,96%);margin:30px auto}.page-title h2{margin:0;font-size:28px}.page-title p{margin:7px 0;color:#64748b}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}.action-link{display:inline-block;text-decoration:none;color:#fff;background:#2563eb;padding:10px 16px;border-radius:8px;font-weight:600;font-size:14px}.action-link:hover{opacity:.92}.secondary{background:#0f766e!important}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}.stat-card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 5px 18px rgba(0,0,0,.07);border-left:5px solid #2563eb}.stat-card.pending{border-left-color:#d97706}.stat-card.assigned{border-left-color:#16a34a}.stat-card.rejected{border-left-color:#dc2626}.stat-card.admin{border-left-color:#7c3aed}.stat-label{color:#64748b;font-size:13px;margin-bottom:8px}.stat-value{font-size:30px;font-weight:800}
+.section{background:#fff;border-radius:14px;padding:22px;margin-bottom:24px;box-shadow:0 5px 18px rgba(0,0,0,.07)}.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.section-header h3{margin:0;font-size:21px}.section-header p{margin:4px 0 0;color:#64748b;font-size:13px}.table-wrapper{overflow-x:auto}table{width:100%;min-width:900px;border-collapse:collapse}th,td{padding:12px 10px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:middle;font-size:13px}th{background:#eef3f9;color:#334155}tr:hover td{background:#f8fafc}.score{font-weight:800}.badge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800}.badge.pending{background:#fef3c7;color:#92400e}.badge.assigned{background:#dcfce7;color:#166534}.reason{max-width:330px;line-height:1.4;color:#475569}.button-row{display:flex;gap:7px;flex-wrap:wrap}.btn{border:0;border-radius:7px;padding:7px 11px;color:#fff;font-weight:700;cursor:pointer;font-size:12px}.btn-approve{background:#16a34a}.btn-reject{background:#dc2626}.btn-manual{background:#7c3aed;text-decoration:none;display:inline-block}.empty{padding:25px;text-align:center;background:#f8fafc;border-radius:10px;color:#64748b}.note{margin-top:10px;font-size:12px;color:#64748b}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.topbar{flex-direction:column;align-items:flex-start}}@media(max-width:560px){.stats{grid-template-columns:1fr}.container{width:94%}}
+</style>
+<style id="sf-v2-theme">
 *{box-sizing:border-box}
-
 :root{
-  --bg:#06111f;
-  --bg-soft:#0a1a2e;
-  --panel:rgba(10,26,46,.92);
-  --panel-2:rgba(13,34,59,.96);
-  --border:rgba(103,232,249,.16);
-  --border-strong:rgba(103,232,249,.30);
-  --cyan:#22d3ee;
-  --cyan-soft:#67e8f9;
-  --blue:#60a5fa;
-  --green:#22c55e;
-  --amber:#f59e0b;
-  --red:#ef4444;
-  --violet:#8b5cf6;
-  --text:#f8fafc;
-  --muted:#9fb1c8;
+  --sf-bg:#020617;
+  --sf-panel:#08172b;
+  --sf-panel-2:#0b203a;
+  --sf-panel-3:#0e2948;
+  --sf-line:rgba(103,232,249,.17);
+  --sf-line-strong:rgba(103,232,249,.30);
+  --sf-cyan:#22d3ee;
+  --sf-blue:#3b82f6;
+  --sf-violet:#8b5cf6;
+  --sf-green:#34d399;
+  --sf-amber:#fbbf24;
+  --sf-red:#fb7185;
+  --sf-text:#f7fbff;
+  --sf-muted:#9fb1cb;
 }
-
 html{scroll-behavior:smooth}
-
 body{
-  margin:0;
-  min-height:100vh;
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
-  color:var(--text);
+  margin:0!important;
+  min-height:100vh!important;
+  color:var(--sf-text)!important;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif!important;
   background:
-    radial-gradient(circle at 8% 5%,rgba(34,211,238,.15),transparent 25%),
-    radial-gradient(circle at 92% 8%,rgba(99,102,241,.16),transparent 25%),
-    linear-gradient(135deg,#020617 0%,#06152b 55%,#071d32 100%);
+    radial-gradient(circle at 8% 4%,rgba(34,211,238,.14),transparent 26%),
+    radial-gradient(circle at 94% 7%,rgba(59,130,246,.15),transparent 28%),
+    linear-gradient(145deg,#020617 0%,#061429 56%,#030814 100%)!important;
 }
-
+body.teacher-page{
+  background:
+    radial-gradient(circle at 8% 4%,rgba(239,255,194,.82),transparent 23%),
+    radial-gradient(circle at 90% 9%,rgba(60,229,214,.25),transparent 30%),
+    linear-gradient(135deg,#dfffb4 0%,#77e3d0 45%,#25b8e5 74%,#0879df 100%)!important;
+}
+a{text-decoration:none}
+button,input,select,textarea{font:inherit}
 .topbar{
-  position:sticky;
-  top:0;
-  z-index:50;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:18px;
-  padding:15px clamp(18px,3vw,34px);
-  background:rgba(2,6,23,.88);
-  border-bottom:1px solid rgba(103,232,249,.14);
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
+  position:sticky!important;top:0!important;z-index:80!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;
+  padding:14px clamp(16px,3vw,32px)!important;
+  background:rgba(2,7,20,.91)!important;
+  border-bottom:1px solid rgba(103,232,249,.14)!important;
+  backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
+  box-shadow:0 10px 34px rgba(0,0,0,.22)!important;
 }
-
-.brand h1{
-  margin:0;
-  font-size:clamp(18px,2vw,24px);
-  font-weight:850;
-  letter-spacing:-.025em;
-}
-
-.brand p{
-  margin:4px 0 0;
-  color:#9fb1c8;
-  font-size:12px;
-}
-
+.topbar h1,.brand h1{color:#fff!important;margin:0!important}
+.topbar p,.brand p{color:#9fb1cb!important;margin:4px 0 0!important}
 .logout{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-height:40px;
-  padding:0 14px;
-  color:#fff!important;
-  background:#dc2626;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:10px;
-  text-decoration:none!important;
-  font-size:13px;
-  font-weight:800;
-  transition:.18s ease;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  min-height:38px!important;padding:0 13px!important;border-radius:10px!important;
+  background:rgba(251,113,133,.07)!important;color:#fecdd3!important;
+  border:1px solid rgba(251,113,133,.22)!important;font-weight:900!important;
 }
-
-.logout:hover{
-  transform:translateY(-1px);
-  filter:brightness(1.05);
+.sf-feature-nav{
+  position:relative;z-index:70;
+  border-bottom:1px solid rgba(103,232,249,.10);
+  background:rgba(4,12,27,.82);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 8px 22px rgba(0,0,0,.16)
 }
-
-.container{
-  width:min(1220px,94%);
-  margin:28px auto 52px;
+.sf-feature-scroll{
+  width:min(1280px,94%);margin:0 auto;
+  display:flex;gap:7px;overflow-x:auto;
+  padding:9px 0;
+  scrollbar-width:thin
 }
-
-.page-head{
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap:20px;
-  margin-bottom:20px;
-}
-
-.page-title h2{
-  margin:0;
-  font-size:clamp(26px,3vw,34px);
-  letter-spacing:-.03em;
-  color:#fff!important;
-}
-
-.page-title p{
-  margin:7px 0 0;
-  color:var(--muted)!important;
-  font-size:13px;
-}
-
-.quick-actions{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:12px;
-  margin-bottom:12px;
-}
-
-.quick-action{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-height:72px;
-  padding:14px 16px;
-  text-decoration:none!important;
-  color:#fff!important;
-  background:linear-gradient(145deg,rgba(11,48,76,.98),rgba(7,28,50,.98));
-  border:1px solid var(--border);
-  border-radius:14px;
-  box-shadow:0 10px 26px rgba(0,0,0,.22);
-  transition:transform .16s ease,border-color .16s ease,background .16s ease;
-}
-
-.quick-action:hover{
-  transform:translateY(-2px);
-  border-color:var(--border-strong);
-  background:linear-gradient(145deg,rgba(14,57,88,.98),rgba(8,33,57,.98));
-}
-
-.quick-icon{
-  display:grid;
-  place-items:center;
-  width:42px;
-  height:42px;
-  flex:0 0 42px;
-  border-radius:12px;
-  background:rgba(34,211,238,.12);
-  border:1px solid rgba(103,232,249,.14);
-  font-size:20px;
-}
-
-.quick-action strong{
-  display:block;
-  font-size:14px;
-  line-height:1.2;
-}
-
-.quick-action span{
-  display:block;
-  margin-top:4px;
-  color:#9fb1c8;
-  font-size:11px;
-}
-
-.tools{
-  margin-bottom:24px;
-}
-
-.tools summary{
-  cursor:pointer;
-  list-style:none;
-  padding:12px 14px;
-  border:1px solid rgba(103,232,249,.12);
-  border-radius:12px;
-  background:rgba(7,20,38,.72);
-  color:#dcecff;
-  font-size:13px;
-  font-weight:800;
-}
-
-.tools summary::-webkit-details-marker{display:none}
-
-.tools[open] summary{
-  border-color:rgba(103,232,249,.22);
-  border-bottom-left-radius:8px;
-  border-bottom-right-radius:8px;
-}
-
-.tool-list{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:9px;
-  padding:10px 0 0;
-}
-
-.tool-link{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 12px;
-  background:rgba(8,22,40,.78);
+.sf-feature-scroll a{
+  flex:0 0 auto;
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:34px;padding:0 11px;border-radius:9px;
+  color:#dcecff!important;background:rgba(255,255,255,.028);
   border:1px solid rgba(148,163,184,.10);
-  border-radius:10px;
-  color:#dbeafe!important;
-  text-decoration:none!important;
-  font-size:12px;
-  font-weight:700;
-  transition:.16s ease;
+  font-size:10px;font-weight:850;white-space:nowrap;
+  transition:.17s ease
 }
-
-.tool-link:hover{
-  border-color:rgba(103,232,249,.24);
-  background:rgba(11,31,54,.96);
-  transform:translateY(-1px);
+.sf-feature-scroll a:hover{
+  color:#fff!important;background:rgba(34,211,238,.08);
+  border-color:var(--sf-line-strong);transform:translateY(-1px)
 }
-
-.stats{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:12px;
-  margin-bottom:24px;
+.container{
+  width:min(1240px,94%)!important;
+  margin:0 auto!important;padding:24px 0 46px!important
 }
-
-.stat-card{
-  position:relative;
-  overflow:hidden;
-  min-height:105px;
-  padding:17px;
-  background:linear-gradient(180deg,#102743,#0a1a30)!important;
-  border:1px solid rgba(148,163,184,.12);
-  border-radius:15px!important;
-  box-shadow:0 12px 30px rgba(0,0,0,.24)!important;
+.back{
+  display:inline-flex!important;align-items:center!important;gap:7px!important;
+  color:#8ceefe!important;font-size:12px!important;font-weight:900!important;
+  margin-bottom:16px!important
 }
-
-.stat-card::after{
-  content:"";
-  position:absolute;
-  inset:auto 0 0 0;
-  height:3px;
-  background:var(--cyan);
+.hero,.hero-card,.section,.card,.content-card,.side-card,.info-card,.profile-details,.panel,.stat-card{
+  background:linear-gradient(145deg,rgba(8,22,43,.93),rgba(5,14,30,.83))!important;
+  color:#f7fbff!important;
+  border:1px solid rgba(103,232,249,.15)!important;
+  box-shadow:0 18px 44px rgba(0,0,0,.20)!important;
+  border-radius:17px!important
 }
-
-.stat-card.pending::after{background:var(--amber)}
-.stat-card.assigned::after{background:var(--green)}
-.stat-card.rejected::after{background:var(--red)}
-.stat-card.admin::after{background:var(--violet)}
-
-.stat-label{
-  color:#a9bad0!important;
-  font-size:11px!important;
-  font-weight:750;
+.hero,.hero-card{padding:22px!important}
+.section,.card,.content-card,.side-card,.panel{padding:18px!important}
+h1,h2,h3,h4,h5,h6,strong,b{color:#fff!important}
+p,.subtitle,.sub,.page-sub,.muted,.note,.reason,.description{color:#9fb1cb!important}
+label{color:#c4d4e8!important;font-weight:850!important}
+input,select,textarea{
+  background:#07152a!important;color:#effaff!important;
+  border:1px solid rgba(148,163,184,.16)!important;
+  border-radius:10px!important;outline:none!important
 }
-
-.stat-value{
-  margin-top:8px;
-  color:#fff!important;
-  font-size:29px!important;
-  line-height:1;
-  font-weight:900!important;
-  letter-spacing:-.03em;
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(103,232,249,.48)!important;
+  box-shadow:0 0 0 4px rgba(34,211,238,.07)!important
 }
-
-.section{
-  margin-bottom:20px;
-  padding:20px!important;
-  background:linear-gradient(180deg,#091a31,#071426)!important;
-  border:1px solid rgba(34,211,238,.20)!important;
-  border-radius:16px!important;
-  box-shadow:0 16px 38px rgba(0,0,0,.28)!important;
-  color:#f8fafc!important;
+.btn,.action-link,.action-button{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  border-radius:10px!important;font-weight:900!important
 }
-
-.section-header{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:14px;
-  margin-bottom:15px!important;
-}
-
-.section-header h3{
-  margin:0;
-  color:#fff!important;
-  font-size:18px!important;
-  font-weight:850;
-}
-
-.section-header p{
-  margin:5px 0 0;
-  color:#9fb1c8!important;
-  font-size:12px;
-}
-
-.table-wrapper{
-  overflow-x:auto;
-  border-radius:11px;
-}
-
-table{
-  width:100%;
-  min-width:860px;
-  border-collapse:separate!important;
-  border-spacing:0 5px!important;
-}
-
-th,td{
-  padding:11px 10px!important;
-  text-align:left;
-  vertical-align:middle!important;
-  font-size:12px;
-}
-
-th{
-  background:#12365b!important;
-  color:#eefaff!important;
-  font-weight:850!important;
-  border-top:1px solid rgba(103,232,249,.18);
-  border-bottom:1px solid rgba(103,232,249,.12);
-}
-
-tbody tr td{
-  background:#102846!important;
-  color:#e9f2fb!important;
-  border-top:1px solid rgba(103,232,249,.06);
-  border-bottom:1px solid rgba(103,232,249,.06);
-}
-
-tbody tr:nth-child(even) td{
-  background:#0d233d!important;
-}
-
-tbody tr:hover td{
-  background:#133452!important;
-}
-
-tbody tr td:first-child{
-  border-left:1px solid rgba(148,163,184,.07);
-  border-radius:8px 0 0 8px;
-}
-
-tbody tr td:last-child{
-  border-right:1px solid rgba(148,163,184,.07);
-  border-radius:0 8px 8px 0;
-}
-
-.score{
-  color:var(--cyan-soft)!important;
-  font-weight:900;
-}
-
-.badge{
-  display:inline-flex!important;
-  align-items:center;
-  justify-content:center;
-  min-height:23px;
-  padding:4px 9px!important;
-  border-radius:999px!important;
-  font-size:10px!important;
-  font-weight:900!important;
-}
-
-.badge.pending{
-  background:rgba(245,158,11,.14)!important;
-  color:#fcd34d!important;
-  border:1px solid rgba(245,158,11,.30);
-}
-
-.badge.assigned{
-  background:rgba(34,197,94,.14)!important;
-  color:#86efac!important;
-  border:1px solid rgba(34,197,94,.28);
-}
-
-.reason{
-  max-width:320px;
-  color:#b9c9da!important;
-  line-height:1.45;
-}
-
-.button-row{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  flex-wrap:wrap;
-}
-
 .btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  border:0;
-  border-radius:8px!important;
-  min-height:31px;
-  padding:0 10px;
-  color:#fff!important;
-  cursor:pointer;
-  font-size:11px;
-  font-weight:800;
-  text-decoration:none!important;
-  transition:.16s ease;
+  min-height:37px!important;padding:0 12px!important;
+  border:0!important;background:linear-gradient(135deg,#22d3ee,#3b82f6)!important;color:#03131c!important;
+  box-shadow:0 9px 22px rgba(34,211,238,.12)!important
 }
-
-.btn:hover{
-  transform:translateY(-1px);
-  filter:brightness(1.06);
+.btn:hover,.action-link:hover,.action-button:hover{transform:translateY(-1px)!important}
+.btn-approve,.green{background:linear-gradient(135deg,#34d399,#10b981)!important;color:#03140f!important}
+.btn-reject,.red{background:linear-gradient(135deg,#fb7185,#ef4444)!important;color:#220307!important}
+.btn-manual,.violet{background:linear-gradient(135deg,#a78bfa,#7c3aed)!important;color:#fff!important}
+.btn.secondary,.secondary{
+  background:rgba(255,255,255,.045)!important;color:#dcecff!important;
+  border:1px solid rgba(148,163,184,.14)!important;box-shadow:none!important
 }
-
-.btn-approve{background:#16a34a!important}
-.btn-reject{background:#dc2626!important}
-.btn-manual{background:#6d4be8!important}
-
+.table-wrapper,.table-wrap,.faculty-grid-wrap,.wrap{
+  overflow-x:auto!important;border-radius:12px!important;
+  border:1px solid rgba(148,163,184,.10)!important;
+  background:rgba(2,8,20,.22)!important
+}
+table{width:100%!important;border-collapse:separate!important;border-spacing:0!important}
+th{
+  background:#0d3150!important;color:#eafcff!important;
+  font-size:9px!important;font-weight:900!important;text-transform:uppercase!important;
+  letter-spacing:.07em!important;border-bottom:1px solid rgba(103,232,249,.14)!important
+}
+td{
+  background:rgba(8,27,47,.78)!important;color:#e6f2ff!important;
+  border-bottom:1px solid rgba(148,163,184,.07)!important
+}
+tbody tr:nth-child(even) td{background:rgba(10,30,51,.84)!important}
+tbody tr:hover td{background:rgba(18,67,84,.90)!important}
+.badge{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  min-height:22px!important;padding:4px 8px!important;border-radius:999px!important;
+  font-size:9px!important;font-weight:950!important;border:1px solid transparent!important
+}
+.badge.pending{background:rgba(251,191,36,.09)!important;color:#fde68a!important;border-color:rgba(251,191,36,.20)!important}
+.badge.assigned,.badge.success{background:rgba(52,211,153,.09)!important;color:#bbf7d0!important;border-color:rgba(52,211,153,.20)!important}
+.badge.rejected,.badge.danger{background:rgba(251,113,133,.09)!important;color:#fecdd3!important;border-color:rgba(251,113,133,.20)!important}
+.badge.admin{background:rgba(139,92,246,.10)!important;color:#ddd6fe!important;border-color:rgba(139,92,246,.20)!important}
+.badge.ok{background:rgba(52,211,153,.09)!important;color:#bbf7d0!important;border-color:rgba(52,211,153,.20)!important}
+.badge.warning{background:rgba(251,191,36,.09)!important;color:#fde68a!important;border-color:rgba(251,191,36,.20)!important}
+.badge.error{background:rgba(239,68,68,.09)!important;color:#fecaca!important;border-color:rgba(239,68,68,.20)!important}
 .empty{
-  padding:28px!important;
-  text-align:center!important;
-  background:rgba(7,22,40,.80)!important;
-  border:1px dashed rgba(103,232,249,.22)!important;
-  border-radius:10px!important;
-  color:#afc0d4!important;
+  padding:32px 18px!important;text-align:center!important;
+  color:#8fa3be!important;background:rgba(4,15,30,.45)!important;
+  border:1px dashed rgba(103,232,249,.16)!important;border-radius:12px!important
 }
-
-.note{
-  margin-top:9px;
-  color:#91a5bd!important;
-  font-size:11px;
+.stats{gap:11px!important}
+.stat,.stat-card{
+  background:linear-gradient(145deg,#0b203d,#08182d)!important;
+  border:1px solid rgba(148,163,184,.10)!important;border-radius:14px!important
 }
-
-.attention{
-  border-color:rgba(245,158,11,.22)!important;
+.section-header,.section-head{margin-bottom:13px!important}
+.search,.faculty-search{background:#07152a!important;color:#fff!important}
+@media(max-width:850px){
+  .topbar{position:relative!important;align-items:flex-start!important}
+  .container{width:94%!important}
+  .sf-feature-scroll{width:94%!important}
 }
-
-.assigned-section{
-  border-color:rgba(34,197,94,.18)!important;
-}
-
-/* Reduce the motion added by the global script on large dashboard sections */
-.section:hover,
-.stat-card:hover{
-  transform:none!important;
-}
-
-@media(max-width:900px){
-  .quick-actions{grid-template-columns:1fr}
-  .tool-list{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .page-head{align-items:flex-start}
-}
-
 @media(max-width:600px){
-  .topbar{
-    position:relative;
-    padding:14px 16px;
-  }
-
-  .container{
-    width:94%;
-    margin-top:20px;
-  }
-
-  .page-head{
-    flex-direction:column;
-    margin-bottom:16px;
-  }
-
-  .tool-list,
-  .stats{
-    grid-template-columns:1fr;
-  }
-
-  .section{
-    padding:16px!important;
-  }
-
-  .section-header{
-    flex-direction:column;
-  }
-
-  table{
-    min-width:780px;
-  }
+  .container{padding-top:18px!important}
+  .hero,.hero-card,.section,.card,.content-card,.side-card{padding:15px!important;border-radius:14px!important}
+  .sf-feature-scroll a{font-size:9px;min-height:32px}
 }
-
 @media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{
-    transition:none!important;
-    scroll-behavior:auto!important;
-  }
+  *,*::before,*::after{transition:none!important;scroll-behavior:auto!important}
 }
 </style>
-</head>
 
-<body>
-<header class="topbar">
-  <div class="brand">
-    <h1>Smart Faculty Substitute System</h1>
-    <p>Main Campus · BCA · HOD / Admin Portal</p>
+</head>
+<body class="sf-admin-page">
+<header class="topbar"><div class="brand"><h1>Smart Faculty Substitute System</h1><p>Main Campus · BCA · HOD / Admin Portal</p></div><a href="{{ url_for('logout') }}" class="logout">Logout</a></header>
+<nav class="sf-feature-nav" aria-label="Admin features">
+  <div class="sf-feature-scroll">
+    <a href="{{ url_for('admin_dashboard') }}">🏠 Dashboard</a>
+    <a href="{{ url_for('admin_absence') }}">👤 Teacher Absence</a>
+    <a href="{{ url_for('admin_today') }}">📅 Today’s Operations</a>
+    <a href="{{ url_for('admin_unavailability') }}">🕒 Unavailability</a>
+    <a href="{{ url_for('admin_faculty_timetables') }}">👩‍🏫 Faculty Timetables</a>
+    <a href="{{ url_for('admin_history') }}">📋 History</a>
+    <a href="{{ url_for('admin_reports') }}">📊 Reports</a>
+    <a href="{{ url_for('what_if_simulation') }}">🔬 What-If</a>
+    <a href="{{ url_for('timetable_validation') }}">✅ Timetable Validation</a>
+    <a href="{{ url_for('teacher_dashboard') }}">👨‍🏫 Teacher Dashboard</a>
   </div>
-  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
-</header>
+</nav>
 
 <main class="container">
-
-  <div class="page-head">
-    <div class="page-title">
-      <h2>Admin Dashboard</h2>
-      <p>Manage absences, substitutions and daily faculty operations.</p>
+<div class="page-title"><h2>Admin Dashboard</h2><p>Manage faculty absences, smart recommendations and approvals.</p>
+<div class="actions">
+<a href="{{ url_for('admin_absence') }}" class="action-link">👤 Teacher Absence</a>
+<a href="{{ url_for('admin_unavailability') }}" class="action-link secondary">🕒 Unavailability Requests</a>
+<a href="{{ url_for('admin_today') }}" class="action-link" style="background:#ea580c">📅 Today's Operations</a>
+<a href="{{ url_for('teacher_dashboard') }}" class="action-link" style="background:#16a34a">👩‍🏫 Teacher Dashboard</a>
+<a href="{{ url_for('what_if_simulation') }}" class="action-link" style="background:#7c3aed">🔬 What-If Simulation</a>
+<a href="{{ url_for('admin_history') }}" class="action-link" style="background:#475569">📋 History</a>
+<a href="{{ url_for('admin_reports') }}" class="action-link" style="background:#0f766e">📊 Reports</a>
+<a href="{{ url_for('timetable_validation') }}" class="action-link" style="background:#0891b2">✅ Timetable Validation</a>
+</div></div>
+<section class="stats"><div class="stat-card pending"><div class="stat-label">Pending Recommendations</div><div class="stat-value">{{ pending|length }}</div></div><div class="stat-card assigned"><div class="stat-label">Assigned Substitutions</div><div class="stat-value">{{ assigned_count }}</div></div><div class="stat-card rejected"><div class="stat-label">Rejected Recommendations</div><div class="stat-value">{{ rejected_count }}</div></div><div class="stat-card admin"><div class="stat-label">Admin Action Required</div><div class="stat-value">{{ admin_actions|length }}</div></div></section>
+<section class="section">
+  <div class="section-header">
+    <div>
+      <h3>📝 Faculty Absence Requests</h3>
+      <p>Review absence requests submitted by faculty before generating substitutions.</p>
     </div>
+    {% if absence_requests %}
+      <span class="badge pending">{{ absence_requests|length }} Pending</span>
+    {% endif %}
   </div>
 
-  <!-- Most-used actions -->
-  <section class="quick-actions" aria-label="Quick actions">
+  {% if absence_requests %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Teacher</th>
+          <th>Department</th>
+          <th>Date</th>
+          <th>Reason</th>
+          <th>Affected Periods</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in absence_requests %}
+        <tr>
+          <td><strong>{{ item.teacher_name }}</strong></td>
+          <td>{{ item.department or '—' }}</td>
+          <td>{{ item.absence_date }}</td>
+          <td class="reason">{{ item.reason or '—' }}</td>
+          <td><strong>{{ item.affected_periods }}</strong></td>
+          <td><span class="badge pending">PENDING</span></td>
+          <td>
+            <div class="button-row">
+              <form method="POST" action="{{ url_for('approve_absence_request', absence_id=item.absence_id) }}">
+                <button class="btn btn-approve" type="submit">✓ Approve</button>
+              </form>
+              <form method="POST" action="{{ url_for('reject_absence_request', absence_id=item.absence_id) }}">
+                <button class="btn btn-reject" type="submit">✕ Reject</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="empty">✅ No pending faculty absence requests.</div>
+  {% endif %}
 
-    <a href="{{ url_for('admin_absence') }}" class="quick-action">
-      <div class="quick-icon">👤</div>
-      <div>
-        <strong>Teacher Absence</strong>
-        <span>Mark a teacher absent</span>
-      </div>
-    </a>
+  <div class="note">Approve the request to mark the teacher absent and trigger the existing substitution recommendation engine.</div>
+</section>
 
-    <a href="{{ url_for('admin_today') }}" class="quick-action">
-      <div class="quick-icon">📅</div>
-      <div>
-        <strong>Today's Operations</strong>
-        <span>See today's substitutions</span>
-      </div>
-    </a>
-
-    <a href="{{ url_for('admin_unavailability') }}" class="quick-action">
-      <div class="quick-icon">🕒</div>
-      <div>
-        <strong>Unavailability</strong>
-        <span>Review faculty requests</span>
-      </div>
-    </a>
-
-  </section>
-
-  <!-- Less frequent tools -->
-  <details class="tools">
-    <summary>More Admin Tools ▾</summary>
-    <div class="tool-list">
-
-      <a href="{{ url_for('teacher_dashboard') }}" class="tool-link">👩‍🏫 Teacher Dashboard</a>
-      <a href="{{ url_for('admin_faculty_timetables') }}" class="tool-link">📚 Faculty Timetables</a>
-      <a href="{{ url_for('timetable_validation') }}" class="tool-link">✅ Timetable Validation</a>
-      <a href="{{ url_for('admin_history') }}" class="tool-link">📋 History</a>
-      <a href="{{ url_for('admin_reports') }}" class="tool-link">📊 Reports</a>
-      <a href="{{ url_for('what_if_simulation') }}" class="tool-link">🔬 What-If Simulation</a>
-
-    </div>
-  </details>
-
-  <!-- Summary -->
-  <section class="stats" aria-label="Dashboard summary">
-
-    <div class="stat-card pending">
-      <div class="stat-label">Pending Recommendations</div>
-      <div class="stat-value">{{ pending|length }}</div>
-    </div>
-
-    <div class="stat-card assigned">
-      <div class="stat-label">Assigned Substitutions</div>
-      <div class="stat-value">{{ assigned_count }}</div>
-    </div>
-
-    <div class="stat-card rejected">
-      <div class="stat-label">Rejected Recommendations</div>
-      <div class="stat-value">{{ rejected_count }}</div>
-    </div>
-
-    <div class="stat-card admin">
-      <div class="stat-label">Admin Action Required</div>
-      <div class="stat-value">{{ admin_actions|length }}</div>
-    </div>
-
-  </section>
-
-  <!-- Pending -->
-  <section class="section">
-    <div class="section-header">
-      <div>
-        <h3>Pending Recommendations</h3>
-        <p>Check the suggested substitute before approving it.</p>
-      </div>
-    </div>
-
-    {% if pending %}
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Period</th>
-            <th>Class</th>
-            <th>Subject</th>
-            <th>Absent Teacher</th>
-            <th>Recommended Teacher</th>
-            <th>Score</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% for item in pending %}
-          <tr>
-            <td>{{ item.assignment_date }}</td>
-            <td>P{{ item.period_no }}</td>
-            <td>{{ item.class_name }}</td>
-            <td>{{ item.subject_name }}</td>
-            <td>{{ item.absent_teacher }}</td>
-            <td><strong>{{ item.substitute_teacher }}</strong></td>
-            <td class="score">{{ "%.2f"|format(item.score or 0) }}</td>
-            <td><span class="badge pending">{{ item.status }}</span></td>
-            <td>
-              <div class="button-row">
-                <form method="POST" action="{{ url_for('approve_assignment', assignment_id=item.assignment_id) }}">
-                  <button class="btn btn-approve" type="submit">Approve</button>
-                </form>
-
-                <form method="POST" action="{{ url_for('reject_assignment', assignment_id=item.assignment_id) }}">
-                  <button class="btn btn-reject" type="submit">Reject</button>
-                </form>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="note">
-      Recommendations are generated automatically and need HOD approval before they become assigned.
-    </div>
-    {% else %}
-      <div class="empty">✅ No pending recommendations right now.</div>
-    {% endif %}
-  </section>
-
-  <!-- Admin action -->
-  <section class="section attention">
-    <div class="section-header">
-      <div>
-        <h3>⚠️ Needs Your Attention</h3>
-        <p>Periods where automatic allocation could not find a substitute.</p>
-      </div>
-    </div>
-
-    {% if admin_actions %}
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Period</th>
-            <th>Class</th>
-            <th>Subject</th>
-            <th>Absent Teacher</th>
-            <th>Reason</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% for item in admin_actions %}
-          <tr>
-            <td>{{ item.assignment_date }}</td>
-            <td>P{{ item.period_no }}</td>
-            <td>{{ item.class_name }}</td>
-            <td>{{ item.subject_name }}</td>
-            <td>{{ item.absent_teacher }}</td>
-            <td class="reason">{{ item.reason }}</td>
-            <td>
-              <a href="{{ url_for('manual_assignment', assignment_id=item.assignment_id) }}" class="btn btn-manual">
-                Manual Assign
-              </a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-      <div class="empty">✅ No manual action is currently required.</div>
-    {% endif %}
-  </section>
-
-  <!-- Assigned -->
-  <section class="section assigned-section">
-    <div class="section-header">
-      <div>
-        <h3>✅ Assigned Substitutions</h3>
-        <p>Finalized duties. Reallocate one when the assigned teacher becomes unavailable.</p>
-      </div>
-    </div>
-
-    {% if assigned %}
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Period</th>
-            <th>Class</th>
-            <th>Subject</th>
-            <th>Absent Teacher</th>
-            <th>Substitute Teacher</th>
-            <th>Status</th>
-            <th>Reason</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% for item in assigned %}
-          <tr>
-            <td>{{ item.assignment_date }}</td>
-            <td>P{{ item.period_no }}</td>
-            <td>{{ item.class_name }}</td>
-            <td>{{ item.subject_name }}</td>
-            <td>{{ item.absent_teacher }}</td>
-            <td><strong>{{ item.substitute_teacher }}</strong></td>
-            <td><span class="badge assigned">{{ item.status }}</span></td>
-            <td class="reason">{{ item.reason }}</td>
-            <td>
-              <a href="{{ url_for('reallocate_assignment', assignment_id=item.assignment_id) }}" class="btn btn-manual">
-                🔄 Reallocate
-              </a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-      <div class="empty">No assigned substitutions yet.</div>
-    {% endif %}
-  </section>
-
-</main>
-
-<script src="{{ url_for('static', filename='js/script.js') }}"></script>
-</body>
-</html>
+<section class="section"><div class="section-header"><div><h3>Pending Recommendations</h3><p>Review and finalize smart substitute recommendations.</p></div></div>{% if pending %}<div class="table-wrapper"><table><thead><tr><th>Date</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent Teacher</th><th>Recommended Teacher</th><th>Score</th><th>Status</th><th>Action</th></tr></thead><tbody>{% for item in pending %}<tr><td>{{ item.assignment_date }}</td><td>P{{ item.period_no }}</td><td>{{ item.class_name }}</td><td>{{ item.subject_name }}</td><td>{{ item.absent_teacher }}</td><td><strong>{{ item.substitute_teacher }}</strong></td><td class="score">{{ "%.2f"|format(item.score or 0) }}</td><td><span class="badge pending">{{ item.status }}</span></td><td><div class="button-row"><form method="POST" action="{{ url_for('approve_assignment', assignment_id=item.assignment_id) }}"><button class="btn btn-approve" type="submit">Approve</button></form><form method="POST" action="{{ url_for('reject_assignment', assignment_id=item.assignment_id) }}"><button class="btn btn-reject" type="submit">Reject</button></form></div></td></tr>{% endfor %}</tbody></table></div><div class="note">Recommendations are generated by the smart allocation engine and require HOD approval before becoming assigned.</div>{% else %}<div class="empty">✅ No pending recommendations.</div>{% endif %}</section>
+<section class="section"><div class="section-header"><div><h3>✅ Assigned Substitutions</h3><p>Finalized duties. Reallocate a duty if the assigned substitute later becomes unavailable.</p></div></div>{% if assigned %}<div class="table-wrapper"><table><thead><tr><th>Date</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent Teacher</th><th>Substitute Teacher</th><th>Status</th><th>Reason</th><th>Action</th></tr></thead><tbody>{% for item in assigned %}<tr><td>{{ item.assignment_date }}</td><td>P{{ item.period_no }}</td><td>{{ item.class_name }}</td><td>{{ item.subject_name }}</td><td>{{ item.absent_teacher }}</td><td><strong>{{ item.substitute_teacher }}</strong></td><td><span class="badge assigned">{{ item.status }}</span></td><td class="reason">{{ item.reason }}</td><td><a href="{{ url_for('reallocate_assignment', assignment_id=item.assignment_id) }}" class="btn btn-manual">🔄 Reallocate</a></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty">No assigned substitutions yet.</div>{% endif %}</section>
+<section class="section"><div class="section-header"><div><h3>⚠️ Admin Action Required</h3><p>Periods where automatic allocation could not find a substitute.</p></div></div>{% if admin_actions %}<div class="table-wrapper"><table><thead><tr><th>Date</th><th>Period</th><th>Class</th><th>Subject</th><th>Absent Teacher</th><th>Reason</th><th>Action</th></tr></thead><tbody>{% for item in admin_actions %}<tr><td>{{ item.assignment_date }}</td><td>P{{ item.period_no }}</td><td>{{ item.class_name }}</td><td>{{ item.subject_name }}</td><td>{{ item.absent_teacher }}</td><td class="reason">{{ item.reason }}</td><td><a href="{{ url_for('manual_assignment', assignment_id=item.assignment_id) }}" class="btn btn-manual">Manual Assign</a></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty">✅ No admin action is currently required.</div>{% endif %}</section>
+</main></body></html>

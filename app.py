@@ -1,4 +1,3 @@
-import os
 from flask import Flask, render_template, request, redirect, url_for, session
 from database import get_connection
 from werkzeug.security import check_password_hash
@@ -14,15 +13,7 @@ from algorithm import (
 
 
 app = Flask(__name__)
-import os
-
-app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key")
-
-app.config.update(
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=os.getenv("SESSION_COOKIE_SECURE", "0") == "1",
-)
+app.secret_key = "smart-faculty-substitute-system-secret-key"
 
 
 # ============================================================
@@ -335,6 +326,47 @@ def admin_dashboard():
         )
         rejected_count = cursor.fetchone()["total"]
 
+        # Faculty absence requests waiting for Admin/HOD approval.
+        # Affected periods are calculated from the real teacher timetable.
+        cursor.execute(
+            """
+            SELECT
+                a.absence_id,
+                a.teacher_id,
+                t.teacher_name,
+                t.department,
+                a.absence_date,
+                a.reason,
+                a.status,
+                COUNT(tt.period_no) AS affected_periods
+            FROM teacher_absence a
+            JOIN teachers t
+              ON a.teacher_id = t.teacher_id
+            LEFT JOIN timetable tt
+              ON tt.teacher_id = a.teacher_id
+             AND tt.day_of_week = CASE DAYOFWEEK(a.absence_date)
+                    WHEN 2 THEN 'MON'
+                    WHEN 3 THEN 'TUE'
+                    WHEN 4 THEN 'WED'
+                    WHEN 5 THEN 'THU'
+                    WHEN 6 THEN 'FRI'
+                    WHEN 7 THEN 'SAT'
+                    ELSE NULL
+                 END
+            WHERE a.status = 'PENDING'
+            GROUP BY
+                a.absence_id,
+                a.teacher_id,
+                t.teacher_name,
+                t.department,
+                a.absence_date,
+                a.reason,
+                a.status
+            ORDER BY a.absence_date ASC, a.absence_id DESC
+            """
+        )
+        absence_requests = cursor.fetchall()
+
     finally:
         cursor.close()
         connection.close()
@@ -346,6 +378,7 @@ def admin_dashboard():
         assigned_count=assigned_count,
         rejected_count=rejected_count,
         assigned=assigned,
+        absence_requests=absence_requests,
     )
 
 
@@ -854,6 +887,144 @@ def admin_absence():
 
 
 # ============================================================
+# TEACHER - FULL DAY ABSENCE REQUEST
+# ============================================================
+
+@app.route("/teacher/absence-request", methods=["GET", "POST"])
+def teacher_absence_request():
+    if not teacher_only():
+        return redirect(url_for("login"))
+
+    teacher_id = session.get("teacher_id")
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        if request.method == "POST":
+            absence_date = request.form.get("absence_date")
+            reason = request.form.get("reason", "").strip()
+
+            if not absence_date:
+                return redirect(url_for("teacher_dashboard"))
+
+            cursor.execute(
+                """
+                SELECT absence_id
+                FROM teacher_absence
+                WHERE teacher_id = %s
+                  AND absence_date = %s
+                  AND status IN ('PENDING', 'APPROVED')
+                LIMIT 1
+                """,
+                (teacher_id, absence_date),
+            )
+            existing = cursor.fetchone()
+
+            if not existing:
+                cursor.execute(
+                    """
+                    INSERT INTO teacher_absence
+                    (teacher_id, absence_date, reason, status)
+                    VALUES (%s, %s, %s, 'PENDING')
+                    """,
+                    (teacher_id, absence_date, reason),
+                )
+                connection.commit()
+
+            return redirect(url_for("teacher_dashboard"))
+
+        return redirect(url_for("teacher_dashboard"))
+    finally:
+        cursor.close()
+        connection.close()
+
+
+# ============================================================
+# ADMIN - APPROVE TEACHER ABSENCE REQUEST
+# ============================================================
+
+@app.route("/admin/absence-request/approve/<int:absence_id>", methods=["POST"])
+def approve_absence_request(absence_id):
+    if not admin_only():
+        return redirect(url_for("login"))
+
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            """
+            SELECT teacher_id, absence_date
+            FROM teacher_absence
+            WHERE absence_id = %s
+              AND status = 'PENDING'
+            LIMIT 1
+            """,
+            (absence_id,),
+        )
+        absence = cursor.fetchone()
+
+        if not absence:
+            return redirect(url_for("admin_dashboard"))
+
+        cursor.execute(
+            """
+            UPDATE teacher_absence
+            SET status = 'APPROVED'
+            WHERE absence_id = %s
+              AND status = 'PENDING'
+            """,
+            (absence_id,),
+        )
+        connection.commit()
+    finally:
+        cursor.close()
+        connection.close()
+
+    # Generate affected-period recommendations only after Admin approval.
+    try:
+        result = create_recommendations(
+            int(absence["teacher_id"]),
+            absence["absence_date"],
+        )
+        print("Absence request approved:", result)
+    except Exception as error:
+        print("Recommendation generation error:", error)
+
+    return redirect(url_for("admin_dashboard"))
+
+
+# ============================================================
+# ADMIN - REJECT TEACHER ABSENCE REQUEST
+# ============================================================
+
+@app.route("/admin/absence-request/reject/<int:absence_id>", methods=["POST"])
+def reject_absence_request(absence_id):
+    if not admin_only():
+        return redirect(url_for("login"))
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            """
+            UPDATE teacher_absence
+            SET status = 'REJECTED'
+            WHERE absence_id = %s
+              AND status = 'PENDING'
+            """,
+            (absence_id,),
+        )
+        connection.commit()
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect(url_for("admin_dashboard"))
+
+
+# ============================================================
 # TEACHER - PERIOD UNAVAILABILITY
 # ============================================================
 
@@ -1148,6 +1319,80 @@ def teacher_dashboard():
         )
         upcoming_substitutions = cursor.fetchall()
 
+        # Faculty absence requests submitted from the Teacher Dashboard.
+        cursor.execute(
+            """
+            SELECT
+                a.absence_id,
+                a.absence_date,
+                a.reason,
+                a.status,
+                (
+                    SELECT COUNT(*)
+                    FROM timetable tt2
+                    WHERE tt2.teacher_id = a.teacher_id
+                      AND tt2.day_of_week = CASE DAYOFWEEK(a.absence_date)
+                            WHEN 2 THEN 'MON'
+                            WHEN 3 THEN 'TUE'
+                            WHEN 4 THEN 'WED'
+                            WHEN 5 THEN 'THU'
+                            WHEN 6 THEN 'FRI'
+                            WHEN 7 THEN 'SAT'
+                            ELSE NULL
+                        END
+                ) AS affected_periods
+            FROM teacher_absence a
+            WHERE a.teacher_id = %s
+            ORDER BY a.absence_date DESC, a.absence_id DESC
+            """,
+            (teacher_id,),
+        )
+        absence_requests = cursor.fetchall()
+
+        # Detailed timetable rows for approved absences, plus any existing
+        # substitute recommendation/assignment for each affected period.
+        cursor.execute(
+            """
+            SELECT
+                a.absence_id,
+                a.absence_date,
+                a.reason,
+                tt.period_no,
+                COALESCE(c.class_name, 'Class') AS class_name,
+                COALESCE(s.subject_name, 'Subject') AS subject_name,
+                sub.teacher_name AS substitute_teacher,
+                sa.status AS substitution_status
+            FROM teacher_absence a
+            JOIN timetable tt
+              ON tt.teacher_id = a.teacher_id
+             AND tt.day_of_week = CASE DAYOFWEEK(a.absence_date)
+                    WHEN 2 THEN 'MON'
+                    WHEN 3 THEN 'TUE'
+                    WHEN 4 THEN 'WED'
+                    WHEN 5 THEN 'THU'
+                    WHEN 6 THEN 'FRI'
+                    WHEN 7 THEN 'SAT'
+                    ELSE NULL
+                 END
+            LEFT JOIN classes c
+              ON tt.class_id = c.class_id
+            LEFT JOIN subjects s
+              ON tt.subject_id = s.subject_id
+            LEFT JOIN substitute_assignments sa
+              ON sa.absent_teacher_id = a.teacher_id
+             AND sa.assignment_date = a.absence_date
+             AND sa.period_no = tt.period_no
+             AND sa.class_id = tt.class_id
+            LEFT JOIN teachers sub
+              ON sa.substitute_teacher_id = sub.teacher_id
+            WHERE a.teacher_id = %s
+              AND a.status = 'APPROVED'
+            ORDER BY a.absence_date DESC, a.absence_id DESC, tt.period_no
+            """,
+            (teacher_id,),
+        )
+        absence_affected_periods = cursor.fetchall()
+
         # Keep the original substitutions collection for compatibility with
         # older templates or code that may still use this variable.
         cursor.execute(
@@ -1185,6 +1430,8 @@ def teacher_dashboard():
         substitutions=substitutions,
         today_substitutions=today_substitutions,
         upcoming_substitutions=upcoming_substitutions,
+        absence_requests=absence_requests,
+        absence_affected_periods=absence_affected_periods,
     )
 
 
